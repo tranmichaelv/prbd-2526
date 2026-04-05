@@ -70,3 +70,30 @@ do $test$
 $test$;
 
 rollback;
+
+-- test password on table users
+do
+$$
+    begin
+        insert into users(id, email, password, full_name, role, phone) -- must succeed
+        values (9,'driszekhnini@epfc.eu','Test password1!', 'dris', 'client', null);
+        insert into users(id, email, password, full_name, role, phone) -- must succeed
+        values (10,'test2@epfc.eu','$2a$06$AqLHN8lgmR/RuJzhUWiEf.TsAnFCIjen3n.j1lLKKY8zoKNPJVZEC', 'Test2 name', 'client', null);
+        insert into users(id, email, password, full_name, role, phone) -- must fail
+        values (11,'test3@epfc.eu','invalid password', 'Test3 name', 'client', null);
+        update users set password = 'Valid password1/' where id = 9; -- must succeed
+    end;
+$$ language plpgsql;
+
+
+
+-- test change role
+
+do
+$$
+    begin
+        update users
+        set role = 'manager'
+        where id = 10;
+    end;
+$$ language plpgsql;
