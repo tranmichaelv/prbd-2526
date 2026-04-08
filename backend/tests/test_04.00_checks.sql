@@ -126,3 +126,58 @@ $$
 $$ language plpgsql;
 
 
+-- test restaurant phone number format
+
+do
+$$
+    begin
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (13,'name1','Rue josse de boek','Bruxelles','+32 4 76 51 43 57','test1',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (14,'name2','Rue josse de boek','Bruxelles','+32 47 65 14 35','test2',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (15,'name3','Rue josse de boek','Bruxelles','+32 476 51 43 57','test3',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (16,'name4','Rue josse de boek','Bruxelles','+32476514357','test4',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (22,'name5','Rue josse de boek','Bruxelles','+32 2 568 56 45','test5',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (17,'name6','Rue josse de boek','Bruxelles','+33 47 88 12 12','test6',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (18,'name7','Rue josse de boek','Bruxelles','32 456 56 45 21','test7',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (19,'name8','Rue josse de boek','Bruxelles','+32 456 56 45','test8',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (20,'name9','Rue josse de boek','Bruxelles','32 456 56 45 32','test9',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (23,'name10','Rue josse de boek','Bruxelles','+32 2 568 56 45','test10',5,3,15);
+
+        -- invalid
+        delete from restaurants where id = 24;
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (24,'name11','Rue josse de boek','Bruxelles','+32 whatever','test11',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (25,'name12','Rue josse de boek','Bruxelles','','test12',5,3,15);
+    end;
+$$ language plpgsql;

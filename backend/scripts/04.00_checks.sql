@@ -81,4 +81,9 @@ check (
     );
 
 
-
+alter table restaurants drop constraint restaurant_phone_number_format_check;
+alter table restaurants
+add constraint restaurant_phone_number_format_check
+check (
+    phone ~ '^\+32( ?\d){8,9}$'
+    );
