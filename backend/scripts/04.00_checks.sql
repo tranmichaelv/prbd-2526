@@ -72,3 +72,13 @@ create trigger role_change
     on users
     for each row
 execute function auth.role_change();
+
+alter table restaurants drop constraint restaurant_name_length_check;
+alter table restaurants
+add constraint restaurant_name_length_check
+check (
+    length(trim(name)) >= 5
+    );
+
+
+

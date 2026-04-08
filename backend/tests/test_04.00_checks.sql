@@ -97,3 +97,32 @@ $$
         where id = 10;
     end;
 $$ language plpgsql;
+
+
+-- test restaurant name length
+do
+$$
+    begin
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (10,'resta','Rue neuve','Bruxelles (1)','+32486514357','test1',5,3,15);
+
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (11,'restaurant','Rue josse de boek','Bruxelles (2)','+32486514357','test2',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,'rest','Rue josse de boek','Bruxelles (3)','+32486514357','test3',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,'','Rue josse de boek','Bruxelles (4)','+32486514357','test4',5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,null,'Rue josse de boek','Bruxelles (5)','+32486514357','test5',5,3,15);
+    end;
+$$ language plpgsql;
+
+
