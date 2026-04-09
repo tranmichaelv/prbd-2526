@@ -102,3 +102,28 @@ alter table restaurants drop constraint restaurants_slot_duration_check;
 alter table restaurants
 add constraint  restaurants_slot_duration_check
 check ( slot_duration in(10,15,20,30,60));
+
+
+-- check restaurants city length
+alter table restaurants drop constraint restaurant_city_length_check;
+alter table restaurants
+    add constraint restaurant_city_length_check
+        check (
+            length(trim(city)) >= 3
+            );
+
+alter table restaurants drop constraint restaurant_rating_bounds_check;
+alter table restaurants
+    add constraint restaurant_rating_bounds_check
+        check (
+            rating between 0.0 and 5.0
+            );
+
+alter table restaurants drop constraint restaurant_price_range_check;
+alter table restaurants
+    add constraint restaurant_price_range_check
+        check (
+            price_range between 1 and 4
+            );
+
+
