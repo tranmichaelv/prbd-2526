@@ -87,3 +87,18 @@ add constraint restaurant_phone_number_format_check
 check (
     phone ~ '^\+32( ?\d){8,9}$'
     );
+
+alter table restaurants drop constraint restaurants_address_length_check;
+alter table restaurants
+add constraint restaurants_address_length_check
+check ( length(trim(address)) >= 5 );
+
+alter table restaurants drop constraint restaurants_desc_length_check;
+alter table restaurants
+add constraint restaurants_desc_length_check
+check ( length(trim(description)) >= 10 );
+
+alter table restaurants drop constraint restaurants_slot_duration_check;
+alter table restaurants
+add constraint  restaurants_slot_duration_check
+check ( slot_duration in(10,15,20,30,60));
