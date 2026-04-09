@@ -101,4 +101,13 @@ alter table reservations
             status in ('pending','confirmed', 'cancelled','completed')
             );
 
+alter table reservations drop constraint  reservations_nb_of_guests_check;
+alter table reservations
+    add constraint reservations_nb_of_guests_check
+        check ( number_of_guests >= 1 );
 
+
+alter table reservations drop constraint reservations_special_request_check;
+alter table reservations
+    add constraint reservations_special_request_check
+        check ( length(trim(special_requests)) >= 10 );
