@@ -1,4 +1,4 @@
-
+set search_path to public;
 create or replace function validate_reservation_client_role()
     returns trigger AS
 $$
