@@ -1,3 +1,4 @@
+set search_path to public;
 do
 $test$
 
