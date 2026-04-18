@@ -33,6 +33,8 @@ create or replace function reservation_number_of_guests_rule_fct() returns trigg
         if not (restaurant_total_capacity >= new.number_of_guests) then
             raise exception 'Number of guests cannot be grater than total capacity of tables for this reservation';
         end if;
+
+        return new;
     end;
     $$ language plpgsql;
 
