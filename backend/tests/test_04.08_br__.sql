@@ -17,7 +17,8 @@ do
 $test$
 begin
        raise notice 'TEST:  Au moment de leur création ou de leur modification, les heures de début et de fin d''un service doivent être alignées sur les créneaux de réservation pour le restaurant. (cas valide)';
-update services set end_time = '15:00:00' where id = 1;
+       update services set end_time = '15:00:00' where id = 1;
+       set constraints all immediate;
 end
 $test$;
 

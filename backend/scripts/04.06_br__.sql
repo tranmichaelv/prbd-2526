@@ -11,14 +11,15 @@ begin
                  join reservations r1 on r1.datetime::date = r.datetime::date
                  join reservation_tables rt1 on rt1.reservation = r1.id
         where get_service(r.datetime) = get_service(r1.datetime)
+          and r.datetime::date = r1.datetime::date
           and rt."table" = rt1."table"
           and r.id > r1.id
-          and r.status in ('confirmed', 'completed')
+          and r.status in ('confirmed'::status_type, 'completed'::status_type)
     ) then
        raise exception 'Table already reserved for this service and date';
     end if;
 
-    return new;
+    return null;
 end;
 $$
 language plpgsql;
