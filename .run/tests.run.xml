@@ -4,6 +4,19 @@
     <script-file value="$PROJECT_DIR$/backend/tests/test_02_impersonation.sql" />
     <script-file value="$PROJECT_DIR$/backend/tests/test_03_reset_database.sql" />
     <script-file value="$PROJECT_DIR$/backend/tests/test_04.00_br_email_unique.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.00_checks.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.01_br_validate_reservation_client.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.000_triggers.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.02_br_number_of_guests_and_reservation_capacity.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.03_br_table_reservation_from_restaurant_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.04_br_time_reservation_between_start_and_and.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.05_br_datetime_slotduration_compatibility.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.06_br__.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.08_br__.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.09_br_reservation_status.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.10_br_restaurant_must_have_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.11_br_reservation_locked_when_completed_or_cancelled.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04.12_br__.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-c03&quot;" />
     <method v="2" />
