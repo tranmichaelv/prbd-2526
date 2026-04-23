@@ -1,7 +1,7 @@
 set search_path to public;
 
-create or replace function no_double_table_booking()
-returns trigger as
+create or replace function no_double_table_booking() returns trigger
+    set search_path from current as
 $$
 begin
     if exists(
@@ -22,7 +22,7 @@ begin
     return null;
 end;
 $$
-language plpgsql;
+language plpgsql security definer;
 
 
 
@@ -36,15 +36,19 @@ $$
 $$ language sql;
 
 
-create or replace trigger trg_no_double_table_booking_reservation_tables
+drop trigger if exists trg_no_double_table_booking_reservation_tables on reservation_tables;
+create constraint trigger trg_no_double_table_booking_reservation_tables
     after insert
     on reservation_tables
+    deferrable initially deferred
     for each row
 execute function no_double_table_booking();
 
-create or replace trigger trg_no_double_table_booking_reservations
+drop trigger if exists trg_no_double_table_booking_reservations on reservations;
+create constraint trigger trg_no_double_table_booking_reservations
     after update
     on reservations
+    deferrable initially deferred
     for each row
 execute function no_double_table_booking();
 

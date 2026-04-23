@@ -62,7 +62,7 @@ create or replace function  reservation_number_of_guests_rule_fct() returns trig
             group by r.id, number_of_guests
             having count(t.id) = 0 OR coalesce(sum(t.capacity),0) < r.number_of_guests
         ) then
-            raise exception 'Total capaity must be greater than or equals to number of guests !';
+            raise exception 'Total capacity must be greater than or equals to number of guests !';
         end if;
 
         return null;

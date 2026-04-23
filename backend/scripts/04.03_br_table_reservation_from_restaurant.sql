@@ -36,6 +36,7 @@ returns trigger as
         end;
     $$ language plpgsql;
 
+drop trigger if exists trg_check_table_reservation_from_restaurant_reservation on reservation_tables;
 create trigger trg_check_table_reservation_from_restaurant_reservation
 before insert or update
 on reservation_tables

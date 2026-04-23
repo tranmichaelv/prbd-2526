@@ -40,5 +40,4 @@ $test$
     end
 $test$;
 
-
 rollback;

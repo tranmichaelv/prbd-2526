@@ -192,6 +192,7 @@ $test$;
 rollback;
 
 -- test password on table users
+begin;
 do
 $$
     begin
@@ -199,39 +200,57 @@ $$
         values (9,'driszekhnini@epfc.eu','Test password1!', 'dris', 'client', null);
         insert into users(id, email, password, full_name, role, phone) -- must succeed
         values (10,'test2@epfc.eu','$2a$06$AqLHN8lgmR/RuJzhUWiEf.TsAnFCIjen3n.j1lLKKY8zoKNPJVZEC', 'Test2 name', 'client', null);
-        insert into users(id, email, password, full_name, role, phone) -- must fail
-        values (11,'test3@epfc.eu','invalid password', 'Test3 name', 'client', null);
         update users set password = 'Valid password1/' where id = 9; -- must succeed
     end;
 $$ language plpgsql;
+rollback;
 
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST check: users_password_ok_check (invalide)';
 
-
+        perform should_fail($$
+        insert into users(id, email, password, full_name, role, phone) -- must fail
+        values (11,'test3@epfc.eu','invalid password', 'Test3 name', 'client', null);
+    $$, 'check_violation');
+    end;
+$test$;
+rollback;
 -- test change role
 
+begin;
 do
-$$
+$test$
     begin
         update users
         set role = 'manager'
         where id = 10;
     end;
-$$ language plpgsql;
+$test$;
 
 
 -- test restaurant name length
 do
-$$
+$test$
     begin
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (10,'resta','Rue neuve','Bruxelles (1)','+32486514357','test1',5,3,15);
+        values (10,'resta','Rue neuve','Bruxelles (1)','+32486514357',null,5,3,15);
 
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (11,'restaurant','Rue josse de boek','Bruxelles (2)','+32486514357','test2',5,3,15);
+        values (11,'restaurant','Rue josse de boek','Bruxelles (2)','+32486514357',null,5,3,15);
+    end;
+$test$;
 
-        -- invalid
+do
+$test$
+    begin
+        raise notice 'TEST: restaurants_desc_length_check (cas invalide)';
+        perform should_fail($$
+            -- invalid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (12,'rest','Rue josse de boek','Bruxelles (3)','+32486514357','test3',5,3,15);
 
@@ -242,36 +261,58 @@ $$
         -- invalid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (12,null,'Rue josse de boek','Bruxelles (5)','+32486514357','test5',5,3,15);
-    end;
-$$ language plpgsql;
 
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,'rest','Rue josse de boek','Bruxelles (3)','+32486514357',null,5,3,15);
 
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,'','Rue josse de boek','Bruxelles (4)','+32486514357',null,5,3,15);
+
+        -- invalid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (12,null,'Rue josse de boek','Bruxelles (5)','+32486514357',null,5,3,15);
+        $$,'check_violation');
+    end
+$test$;
 -- test restaurant phone number format
 
 do
-$$
+$test$
     begin
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (13,'name1','Rue josse de boek','Bruxelles','+32 4 76 51 43 57','test1',5,3,15);
+        values (13,'name1','Rue josse de boek','Bruxelles','+32 4 76 51 43 57',null,5,3,15);
 
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (14,'name2','Rue josse de boek','Bruxelles','+32 47 65 14 35','test2',5,3,15);
+        values (14,'name2','Rue josse de boek','Bruxelles','+32 47 65 14 35',null,5,3,15);
 
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (15,'name3','Rue josse de boek','Bruxelles','+32 476 51 43 57','test3',5,3,15);
+        values (15,'name3','Rue josse de boek','Bruxelles','+32 476 51 43 57',null,5,3,15);
 
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (16,'name4','Rue josse de boek','Bruxelles','+32476514357','test4',5,3,15);
+        values (16,'name4','Rue josse de boek','Bruxelles','+32476514357',null,5,3,15);
 
         -- valid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (22,'name5','Rue josse de boek','Bruxelles','+32 2 568 56 45','test5',5,3,15);
+        values (22,'name5','Rue josse de boek','Bruxelles','+32 2 568 56 45',null,5,3,15);
 
-        -- invalid
+        -- valid
+        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
+        values (23,'name10','Rue josse de boek','Bruxelles','+32 2 568 56 45',null,5,3,15);
+    end;
+$test$;
+
+do
+$test$
+    begin
+        raise notice 'TEST: (cas invalide)';
+        perform should_fail($$
+            -- invalid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (17,'name6','Rue josse de boek','Bruxelles','+33 47 88 12 12','test6',5,3,15);
 
@@ -287,11 +328,7 @@ $$
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (20,'name9','Rue josse de boek','Bruxelles','32 456 56 45 32','test9',5,3,15);
 
-        -- valid
-        insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
-        values (23,'name10','Rue josse de boek','Bruxelles','+32 2 568 56 45','test10',5,3,15);
-
-        -- invalid
+         -- invalid
         delete from restaurants where id = 24;
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (24,'name11','Rue josse de boek','Bruxelles','+32 whatever','test11',5,3,15);
@@ -299,5 +336,7 @@ $$
         -- invalid
         insert into restaurants (id,name,address,city,phone,description,rating,price_range,slot_duration)
         values (25,'name12','Rue josse de boek','Bruxelles','','test12',5,3,15);
-    end;
-$$ language plpgsql;
+        $$,'check_violation');
+    end
+$test$;
+rollback;

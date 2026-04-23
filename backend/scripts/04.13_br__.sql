@@ -8,7 +8,7 @@ begin
         select *
         from
             reservations r, reservations r1
-        where r > r1
+        where r.id > r1.id
           and r.client = r1.client
           and r.datetime::date = r1.datetime::date
           and get_service(r.datetime) = get_service(r1.datetime)

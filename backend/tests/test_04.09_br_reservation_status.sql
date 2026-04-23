@@ -1,7 +1,6 @@
 set search_path to public;
 
-
-select reset_database();
+begin;
 
 do $test$
     begin
@@ -9,6 +8,7 @@ do $test$
 
         insert into reservations(client, restaurant, datetime, number_of_guests, status, special_requests)
         values (3, 1, '2024-12-05 19:00:00', 2, 'pending', null);
+        set constraints all immediate;
     end;
 $test$;
 
@@ -22,17 +22,26 @@ do $test$
     $$, 'raise_exception');
     end;
 $test$;
+rollback;
 
+begin;
 do $test$
     begin
         raise notice 'TEST BR-09: pending -> confirmed (valid)';
 
         update reservations
         set status = 'confirmed'
-        where id = 21;
+        where id = 22;
+
+        insert into reservation_tables (reservation, "table")
+        values (22, 10);
+
+        set constraints all immediate;
     end;
 $test$;
+rollback;
 
+begin;
 do $test$
     begin
         raise notice 'TEST BR-09: pending -> cancelled (valid)';
@@ -40,10 +49,13 @@ do $test$
         update reservations
         set status = 'cancelled'
         where id = 22;
+
+        set constraints all immediate;
     end;
 $test$;
+rollback;
 
-select reset_database();
+begin;
 
 do $test$
     begin
@@ -56,7 +68,9 @@ do $test$
     $$, 'raise_exception');
     end;
 $test$;
+rollback;
 
+begin;
 do $test$
     begin
         raise notice 'TEST BR-09: confirmed -> completed (valid)';
@@ -64,21 +78,30 @@ do $test$
         update reservations
         set status = 'completed'
         where id = 20;
+
+        set constraints all immediate;
     end;
 $test$;
+rollback;
 
-select reset_database();
+begin;
 
 do $test$
     begin
         raise notice 'TEST BR-09: confirmed -> cancelled (valid)';
 
+        delete from reservation_tables where reservation = 20;
+
         update reservations
         set status = 'cancelled'
         where id = 20;
+
+        set constraints all immediate;
     end;
 $test$;
+rollback;
 
+begin;
 do $test$
     declare
         rid int;
@@ -96,9 +119,13 @@ do $test$
         update reservations
         set status = 'pending'
         where id = rid;
+
+        set constraints all immediate;
     end;
 $test$;
+rollback;
 
+begin;
 do $test$
     begin
         raise notice 'TEST BR-09: confirmed -> pending in past (invalid)';
