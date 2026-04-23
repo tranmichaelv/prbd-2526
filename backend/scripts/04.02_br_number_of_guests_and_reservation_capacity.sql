@@ -67,7 +67,7 @@ create or replace function  reservation_number_of_guests_rule_fct() returns trig
     end;
     $$ language plpgsql security definer ;
 
-drop trigger tg_reservation_number_of_guests on reservations;
+drop trigger if exists  tg_reservation_number_of_guests on reservations;
 create constraint trigger tg_reservation_number_of_guests
     after insert or update
     on reservations
@@ -75,7 +75,7 @@ create constraint trigger tg_reservation_number_of_guests
     for each row
     execute function reservation_number_of_guests_rule_fct();
 
-drop trigger tg_res_tables_capacity on reservation_tables;
+drop trigger if exists  tg_res_tables_capacity on reservation_tables;
 create constraint trigger tg_res_tables_capacity
     after delete
     on reservation_tables
@@ -83,7 +83,7 @@ create constraint trigger tg_res_tables_capacity
     for each row
     execute function reservation_number_of_guests_rule_fct();
 
-drop trigger tg_tables_capacity_update on tables;
+drop trigger if exists tg_tables_capacity_update on tables;
 create constraint trigger tg_tables_capacity_update
     after update or delete
     on tables
