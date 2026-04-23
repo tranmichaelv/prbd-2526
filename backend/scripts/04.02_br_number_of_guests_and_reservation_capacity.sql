@@ -50,7 +50,7 @@ create or replace function  reservation_number_of_guests_rule_fct() returns trig
     begin
         if exists(
             select
-                *
+                1
             from
                 reservations r
                     -- j'ai choisi left join pour les reservations sans table,
@@ -64,6 +64,8 @@ create or replace function  reservation_number_of_guests_rule_fct() returns trig
         ) then
             raise exception 'Total capaity must be greater than or equals to number of guests !';
         end if;
+
+        return null;
     end;
     $$ language plpgsql security definer ;
 
