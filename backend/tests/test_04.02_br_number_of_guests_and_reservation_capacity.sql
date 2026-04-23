@@ -1,12 +1,11 @@
 set search_path to public;
 
-select * from reservations;
-select * from tables;
+
 begin;
 do
 $test$
 begin
-        -- Invalid
+
     insert into reservations (id, client, restaurant, datetime, number_of_guests, status)
     VALUES (25,3,1,'2024-11-15 19:00:00.000000',6,'confirmed');
 
@@ -22,7 +21,7 @@ begin
 
     update reservations
     set status = 'confirmed'
-    where id = ;
+    where id = 22;
 end;
 $test$ ;
 rollback;
