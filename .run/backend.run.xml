@@ -17,6 +17,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04.13_br__.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.14_br_create_reservation_from_past.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.11_br_reservation_locked_when_completed_or_cancelled.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.07_br_restaurant_services_overlap_same_day.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-c03&quot;" />
     <method v="2" />
