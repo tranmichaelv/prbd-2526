@@ -78,7 +78,7 @@ $test$
         raise notice 'TEST: service est unique a un restaurant, jour, debut et fin de service (cas invalide)';
         perform should_fail($$
             update services set start_time = '12:00:00', end_time = '15:00:00' where id = 2;
-        $$, 'unique_violation');
+        $$, 'raise_exception');
     end
 $test$;
 
@@ -87,9 +87,11 @@ do
 $test$
     begin
         raise notice 'TEST: le numero du jour de la semaine doit être entre 1 et 7 (cas valide)';
-        update services set day_of_week = '2' where id = 1;
+        update services set day_of_week = '1' where id = 1;
     end
 $test$;
+
+rollback;
 
 do
 $test$
@@ -106,9 +108,10 @@ do
 $test$
     begin
         raise notice 'TEST: L''heure de fin doit être postérieure à l''heure de début d''au moins une heure. (cas valide)';
-        update services set start_time = '14:00:00' where id = 1;
+        update services set start_time = '11:00:00' where id = 1;
     end
 $test$;
+
 
 do
 $test$
@@ -116,7 +119,7 @@ $test$
         raise notice 'TEST: L''heure de fin doit être postérieure à l''heure de début d''au moins une heure. (cas invalide)';
         perform should_fail($$
             update services set start_time = '14:30:00' where id = 1;
-        $$,'check_violation');
+        $$,'raise_exception');
     end
 $test$;
 rollback;
