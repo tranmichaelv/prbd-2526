@@ -13,8 +13,10 @@ begin
        if not exists(
            select *
            from services s
-           where day_of_week = day
-             and new.datetime::time between start_time and end_time
+           where s.restaurant = new.restaurant
+           and s.day_of_week = day
+           and new.datetime::time >= s.start_time
+           and new.datetime::time < s.end_time
        ) then
            raise exception 'Reservation datetime % is outside service hours for restaurant %',
                new.datetime, new.restaurant;
