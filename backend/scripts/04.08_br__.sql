@@ -1,26 +1,25 @@
 set search_path to public;
 
 
-create or replace function start_and_endtime_align_to_reservations()
+create or replace function services_times_align_to_reservations_slots()
 returns trigger as
 $$
+    declare slot int;
 begin
-       if exists(
-           select *
-           from reservations
-           where restaurant = new.restaurant
-            and extract(isodow from datetime) = new.day_of_week
-             and datetime::time not between new.start_time and new.end_time
-       ) then
-           raise exception 'Service is collapsing with one or more reservations';
-    end if;
+        select slot_duration   into slot
+        from restaurants
+        where id = new.restaurant;
 
+        if extract(minute  from new.start_time):: int % slot <> 0
+           or extract(minute from new.end_time):: int % slot <> 0 then
+            raise exception 'Services times must align with reservation slots';
+        end if;
     return new;
 end;
 $$ LANGUAGE plpgsql;
 
-create or replace trigger tg_start_and_endtime_align_to_reservations
+create or replace trigger tg_service_times_align
     before insert or update
     on services
     for each row
-execute function start_and_endtime_align_to_reservations();
+execute function services_times_align_to_reservations_slots()
