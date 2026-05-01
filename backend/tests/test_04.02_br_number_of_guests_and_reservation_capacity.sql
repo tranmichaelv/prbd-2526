@@ -7,7 +7,7 @@ $test$
 begin
     raise notice 'TEST:  Le nombre de convives d''une réservation confirmée ou terminée ne peut pas dépasser la capacité totale des tables associées à la réservation. Ceci implique qu''une réservation confirmée ou terminée doit avoir au moins une table réservée appartenant au restaurant de la réservation. (cas valide)';
     insert into reservations (id, client, restaurant, datetime, number_of_guests, status)
-    VALUES (25,3,1,'2024-12-15 19:00:00.000000',6,'pending');
+    VALUES (25,3,1,'2024-12-07 19:00:00.000000',6,'pending');
 
     update reservations set status = 'confirmed'::status_type where id = 25;
 
