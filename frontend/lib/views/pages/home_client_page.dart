@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
 import '../../core/services/api_client.dart';
 
 
-class HomeClientMockupScreen extends StatefulWidget {
-  const HomeClientMockupScreen({super.key});
+class HomeClientPageScreen extends StatefulWidget {
+  const HomeClientPageScreen({super.key});
   @override
-  State<HomeClientMockupScreen> createState() => _HomeClientMockupScreenState();
+  State<HomeClientPageScreen> createState() => _HomeClientPageScreenState();
 }
 
-class _HomeClientMockupScreenState extends State<HomeClientMockupScreen> {
+class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
 
   // listes des réservations reçues depuis le backend
   List<dynamic> reservations = [];
@@ -160,7 +161,12 @@ class _HomeClientMockupScreenState extends State<HomeClientMockupScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                        MaterialPageRoute(builder: (context) => ReservationDetailsPageScreen(reservation: r))
+                      );
+                    },
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
