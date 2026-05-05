@@ -9,7 +9,35 @@ class ReservationDetailsPageScreen extends StatelessWidget {
     required this.reservation,
   });
 
+String getStatuxText(String status) {
+  switch(status) {
+    case 'pending' :
+      return 'En attente';
+    case 'confirmed' :
+      return 'Confirmée';
+    case 'completed' :
+      return 'Terminée';
+    case 'cancelled' :
+      return 'Annulée';
+    default :
+      return status;
+  }
+}
+Color getStatusColor(String status) {
+  switch(status) {
+    case 'pending' :
+      return Colors.orange;
+    case 'confirmed' :
+      return Colors.green;
+    case 'completed' :
+      return Colors.blue;
+    case 'cancelled' :
+      return Colors.red;
+    default :
+      return Colors.grey;
+  }
 
+}
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -150,39 +178,47 @@ class ReservationDetailsPageScreen extends StatelessWidget {
                           const Text('Statut: '),
                           Chip(
                             label: Text(
-                              reservation['status'],
+                             getStatuxText(reservation['status']),
                               style: TextStyle(fontSize: 12, color: Colors.white),
                             ),
-                            backgroundColor: const Color(0xFFFF9800),
+                            backgroundColor: getStatusColor(reservation['status']),
                             padding: EdgeInsets.zero,
                           ),
                         ],
                       ),
+                      if(reservation['special_requests'] != null && reservation['special_requests'].toString().isNotEmpty ) ...[
                       const SizedBox(height: 16),
                       const Divider(),
-                      const SizedBox(height: 8),
-                       Text(
-                        'Demandes spéciales',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Demandes spéciales',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        reservation['special_requests']  ?? 'Aucune demande spéciale',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          reservation['special_requests'],
+                          style: TextStyle(color: Colors.grey[700]),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 24),
+              if(reservation['status'] == 'pending' || reservation['status'] == 'confirmed')
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: (reservation['status'] == 'pending' &&
+                          DateTime.parse(reservation['datetime']).isAfter(simulatedTime))
+                          ? () {
+                        // TODO: aller vers la page de edit reservation
+                      }
+                          : null,
                       icon: const Icon(Icons.edit),
                       label: const Text('Modifier'),
                     ),
@@ -190,7 +226,9 @@ class ReservationDetailsPageScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: aller vers la page de cancel reservation
+                      },
                       icon: const Icon(Icons.cancel),
                       label: const Text('Annuler'),
                     ),
