@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
+import 'package:prbd_2526_c03/views/pages/search_restaurants_page.dart';
 import '../../core/services/api_client.dart';
 
 
@@ -56,7 +57,12 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchRestaurantsPageScreen())
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -263,7 +269,10 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: aller vers page création réservation
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SearchRestaurantsPageScreen())
+          );
         },
         icon: const Icon(Icons.add),
         label: const Text('Nouvelle réservation'),
