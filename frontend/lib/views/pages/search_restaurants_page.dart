@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_details_page.dart';
 import '../../core/tools/app_config.dart';
 
 class SearchRestaurantsPageScreen extends StatefulWidget {
@@ -318,14 +319,12 @@ class _SearchRestaurantsPageScreenState extends State<SearchRestaurantsPageScree
                             trailing:
                             const Icon(Icons.chevron_right),
                             onTap: () {
-                              /*
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => RestaurantDetailsPageScreen(),
-
-                                      */
-
+                                      builder: (context) => RestaurantDetailsPageScreen(restaurant: restaurant),
+                                  ),
+                              );
                             },
                           ),
                         );

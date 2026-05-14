@@ -1,12 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/models/restaurant_service.dart';
 
 
-class RestaurantDetailsPageScreen extends StatelessWidget {
-  const RestaurantDetailsPageScreen({super.key});
+class RestaurantDetailsPageScreen extends StatefulWidget {
+
+  final RestaurantSearchResult restaurant;
+
+  const RestaurantDetailsPageScreen({
+    super.key,
+    required this.restaurant,
+  });
+
+  @override
+  State<RestaurantDetailsPageScreen> createState() =>
+    _RestaurantDetailsPageScreenState();
+  }
+
+  class _RestaurantDetailsPageScreenState extends State<RestaurantDetailsPageScreen> {
+    List<RestaurantService> services = [];
+    bool isLoadingServices = true;
+
+    @override
+    void initState() {
+      super.initState();
+      loadServices();
+    }
+
+    Future<void> loadServices() async {
+      final result = await RestaurantService.getByRestaurant(widget.restaurant.id);
+
+      if (!mounted) return;
+      setState(() {
+        services = result;
+        isLoadingServices = false;
+      });
+
+    }
+
+    String getDayName(int day) {
+      switch (day) {
+        case 1:
+          return 'Lundi';
+        case 2:
+          return 'Mardi';
+        case 3:
+          return 'Mercredi';
+        case 4:
+          return 'Jeudi';
+        case 5:
+          return 'Vendredi';
+        case 6:
+          return 'Samedi';
+        case 7:
+          return 'Dimanche';
+        default:
+          return '';
+      }
+    }
+
+    String formatTime(String time) {
+      return time.substring(0, 5);
+    }
 
   @override
   Widget build(BuildContext context) {
+    final restaurant = widget.restaurant;
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -60,7 +120,7 @@ class RestaurantDetailsPageScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Le Gourmet',
+                restaurant.name,
                 style: const TextStyle(
                     fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -69,13 +129,13 @@ class RestaurantDetailsPageScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.star, color: Colors.amber),
                   const SizedBox(width: 4),
-                  Text(4.5.toStringAsFixed(1)),
+                  Text(restaurant.rating?.toStringAsFixed(1) ?? '-'),
                   const SizedBox(width: 16),
-                  Text('€' * 3),
+                  Text('€' * (restaurant.priceRange ?? 0)),
                   const SizedBox(width: 16),
                   const Icon(Icons.location_on, size: 16),
                   const SizedBox(width: 4),
-                  const Text('Bruxelles'),
+                   Text(restaurant.city),
                 ],
               ),
               const SizedBox(height: 8),
@@ -85,7 +145,7 @@ class RestaurantDetailsPageScreen extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      'Rue de la Paix 12',
+                      restaurant.address,
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ),
@@ -97,192 +157,43 @@ class RestaurantDetailsPageScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text('Restaurant gastronomique français'),
+               Text(restaurant.description ?? 'Aucune description'),
               const SizedBox(height: 24),
               const Text(
                 'Horaires',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Lundi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
+              if (isLoadingServices)
+                const SizedBox.shrink()
+              else if (services.isEmpty)
+                const Text('Aucun horaire disponible')
+              else
+                Column(
+                  children: services.map((service) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 90,
+                            child: Text(
+                              getDayName(service.dayOfWeek),
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Mardi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
+                          Expanded(
+                            child: Text(
+                              '${formatTime(service.startTime)} - ${formatTime(service.endTime)}',
+                              style: const TextStyle(fontFamily: 'monospace'),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Mercredi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Jeudi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Vendredi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 23:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Samedi',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '19:00 - 23:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text(
-                                  'Dimanche',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
