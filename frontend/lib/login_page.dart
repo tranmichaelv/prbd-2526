@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/services/api_client.dart';
 import 'package:prbd_2526_c03/services/params.dart';
 import 'package:prbd_2526_c03/services/security.dart';
+import 'package:prbd_2526_c03/signup_page.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -156,7 +158,14 @@ class _LoginState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 6),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SignupPage(),
+                              ),
+                          );
+                        },
                         child: const Text(
                           'Pas encore de compte ? S\'inscrire',
                         ),
@@ -193,7 +202,9 @@ class _LoginState extends State<LoginPage> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            login(context, 'brlacroix@epfc.eu', 'Password1,');
+                          },
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Bruno)'),
                           style: OutlinedButton.styleFrom(
@@ -204,7 +215,9 @@ class _LoginState extends State<LoginPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            login(context, 'mamichel@epfc.eu', 'Password1,');
+                          },
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Marc)'),
                           style: OutlinedButton.styleFrom(
@@ -219,7 +232,9 @@ class _LoginState extends State<LoginPage> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            login(context, 'bepenelle@epfc.eu', 'Password1,');
+                          },
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Benoît)'),
                           style: OutlinedButton.styleFrom(
@@ -230,7 +245,9 @@ class _LoginState extends State<LoginPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            login(context, 'gedielman@epfc.eu', 'Password1,');
+                          },
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Geoffrey)'),
                           style: OutlinedButton.styleFrom(
@@ -244,7 +261,9 @@ class _LoginState extends State<LoginPage> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                          resetDataBase();
+                      },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Réinitialiser la base de données'),
                       style: OutlinedButton.styleFrom(
@@ -304,6 +323,23 @@ class _LoginState extends State<LoginPage> {
         setState(() {
           loginError = 'Email ou mot de passe incorrect';
         });
+    }
+  }
+
+  Future<void> resetDataBase() async {
+
+    final response = await ApiClient.post(
+      'reset_database',
+      anonymous: true,
+    );
+
+    // print('Status reset DB: ${response.statusCode}');
+    // print('Body reset DB: ${response.body}');
+
+    if (response.statusCode != 204 ) {
+      throw Exception('Erreur lors de la réinitialisation de la base de données: '
+          '${response.statusCode} ${response.body}',
+      );
     }
   }
 
