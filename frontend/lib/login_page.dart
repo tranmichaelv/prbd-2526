@@ -261,9 +261,7 @@ class _LoginState extends State<LoginPage> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                          resetDataBase();
-                      },
+                      onPressed: _confirmResetDataBase,
                       icon: const Icon(Icons.refresh),
                       label: const Text('Réinitialiser la base de données'),
                       style: OutlinedButton.styleFrom(
@@ -344,4 +342,62 @@ class _LoginState extends State<LoginPage> {
   }
 
 
+  Future<void> _confirmResetDataBase() async {
+
+    final confirmed = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Réinitialiser la base de données'),
+            content: const Text(''
+                'Êtes-vous sûr de vouloir réinitialiser la base de données ? '
+                'Cette action supprimera toutes les données et les restaurera '
+                'aux valeurs par défaut.',
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('Annuler'),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white
+              ),
+              child: const Text('Réinitialiser'),
+              )
+            ],
+          );
+        }
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    try {
+      await resetDataBase();
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Base de données réinitialisée'),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de la réinitialisation'),
+        ),
+      );
+    }
+  }
 }
