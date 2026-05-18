@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/models/reservation.dart';
 
 class ReservationDetailsPageScreen extends StatelessWidget {
-  final Map<String, dynamic> reservation;
+  final Reservation reservation;
 
   const ReservationDetailsPageScreen({
     super.key,
     required this.reservation,
   });
 
-String getStatuxText(String status) {
+String getStatusText(String status) {
   switch(status) {
     case 'pending' :
       return 'En attente';
@@ -42,7 +43,7 @@ Color getStatusColor(String status) {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-    final dateTime = DateTime.parse(reservation['datetime']);
+    final dateTime = reservation.datetime;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,7 +106,7 @@ Color getStatusColor(String status) {
                           const SizedBox(width: 8),
                            Expanded(
                             child: Text(
-                              reservation['restaurant_name'],
+                              reservation.restaurantName,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -125,7 +126,7 @@ Color getStatusColor(String status) {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              '${reservation['restaurant_address']}, ${reservation['restaurant_city']}',
+                              '${reservation.restaurantAddress}, ${reservation.restaurantCity}',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ),
@@ -137,7 +138,7 @@ Color getStatusColor(String status) {
                           const Icon(Icons.phone, size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            reservation['restaurant_phone'],
+                            reservation.restaurantPhone,
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
@@ -167,7 +168,7 @@ Color getStatusColor(String status) {
                         children: [
                           const Icon(Icons.people, size: 20),
                           const SizedBox(width: 8),
-                           Text('Nombre de convives:  ${reservation['number_of_guests']}'),
+                           Text('Nombre de convives:  ${reservation.numberOfGuests}'),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -178,15 +179,15 @@ Color getStatusColor(String status) {
                           const Text('Statut: '),
                           Chip(
                             label: Text(
-                             getStatuxText(reservation['status']),
+                             getStatusText(reservation.status),
                               style: TextStyle(fontSize: 12, color: Colors.white),
                             ),
-                            backgroundColor: getStatusColor(reservation['status']),
+                            backgroundColor: getStatusColor(reservation.status),
                             padding: EdgeInsets.zero,
                           ),
                         ],
                       ),
-                      if(reservation['special_requests'] != null && reservation['special_requests'].toString().isNotEmpty ) ...[
+                      if(reservation.specialRequests != null && reservation.specialRequests.toString().isNotEmpty ) ...[
                       const SizedBox(height: 16),
                       const Divider(),
                         const SizedBox(height: 8),
@@ -199,7 +200,7 @@ Color getStatusColor(String status) {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          reservation['special_requests'],
+                          reservation.specialRequests!,
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ],
@@ -208,13 +209,13 @@ Color getStatusColor(String status) {
                 ),
               ),
               const SizedBox(height: 24),
-              if(reservation['status'] == 'pending' || reservation['status'] == 'confirmed')
+              if(reservation.status == 'pending' || reservation.status == 'confirmed')
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: (reservation['status'] == 'pending' &&
-                          DateTime.parse(reservation['datetime']).isAfter(simulatedTime))
+                      onPressed: (reservation.status == 'pending' &&
+                          (reservation.datetime).isAfter(simulatedTime))
                           ? () {
                         // TODO: aller vers la page de edit reservation
                       }

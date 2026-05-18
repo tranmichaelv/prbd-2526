@@ -20,7 +20,7 @@ class RestaurantService {
     );
   }
 
-  static Future<List<RestaurantService>> getByRestaurant (int restaurantId) async {
+  static Future<List<RestaurantService>> getByRestaurantService (int restaurantId) async {
     final response = await ApiClient.post(
       'get_restaurants_services',
       anonymous: true,

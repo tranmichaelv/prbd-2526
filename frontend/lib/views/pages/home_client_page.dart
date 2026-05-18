@@ -1,54 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
 import 'package:prbd_2526_c03/views/pages/search_restaurants_page.dart';
 import '../../core/services/api_client.dart';
 
 
-class HomeClientPageScreen extends StatefulWidget {
+class HomeClientPageScreen extends ConsumerStatefulWidget{
   const HomeClientPageScreen({super.key});
+  
   @override
-  State<HomeClientPageScreen> createState() => _HomeClientPageScreenState();
+  ConsumerState<HomeClientPageScreen> createState() => _HomeClientPageScreenState();
 }
 
-class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
-
-  // listes des réservations reçues depuis le backend
-  List<dynamic> reservations = [];
-  bool isLoading = true;
-  String? errorMessage;
+class _HomeClientPageScreenState extends ConsumerState<HomeClientPageScreen> {
   String selectedFilter = 'pending';
-  @override
-  void initState() {
-    super.initState();
-    loadReservation();
-  }
-
-  Future<void> loadReservation() async {
-    try {
-      final response = await ApiClient.get('get_reservations');
-
-      if (response.statusCode != 200) {
-        throw Exception(response.body);
-      }
-      setState(() {
-        reservations = jsonDecode(response.body);
-        isLoading = false;
-        errorMessage = null;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        errorMessage = e.toString();
-      });
-    }
-  }
-
-
+  
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final reservations = ref.watch(reservationsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -68,10 +41,7 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
             onPressed: () {
-              setState(() {
-                isLoading = true;
-              });
-              loadReservation();
+             ref.read(reservationsProvider.notifier).loadReservations();
             },
           ),
           IconButton(
@@ -148,18 +118,18 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
               ),
             ),
             const SizedBox(height: 8),
-      Expanded(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : errorMessage != null
-            ? Center(child: Text(errorMessage!))
-            : Builder(
-          builder: (context) {
-            final filteredReservations = selectedFilter == 'all'
-                ? reservations
-                : reservations
-                .where((r) => r['status'] == selectedFilter)
-                .toList();
+            Expanded(
+              child: reservations.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stackTrace) => Center(
+                  child: Text(error.toString()),
+                ),
+                data: (reservations) {
+                  final filteredReservations = selectedFilter == 'all'
+                      ? reservations
+                      : reservations
+                      .where((r) => r.status == selectedFilter)
+                      .toList();
 
             return ListView(
               padding: const EdgeInsets.all(16.0),
@@ -178,25 +148,22 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
                       child: Row(
                         children: [
                           //  icône dynamique selon le status
-                          Tooltip(
-                            message: r['status'],
-                            child: Icon(
-                              r['status'] == 'pending'
-                                  ? Icons.pending
-                                  : r['status'] == 'confirmed'
-                                  ? Icons.check_circle
-                                  : r['status'] == 'completed'
-                                  ? Icons.event_available
-                                  : Icons.cancel,
-                              size: 32,
-                              color: r['status'] == 'pending'
-                                  ? Colors.orange
-                                  : r['status'] == 'confirmed'
-                                  ? Colors.green
-                                  : r['status'] == 'completed'
-                                  ? Colors.blue
-                                  : Colors.red,
-                            ),
+                          Icon(
+                            r.status == 'pending'
+                                ? Icons.pending
+                                : r.status == 'confirmed'
+                                ? Icons.check_circle
+                                : r.status == 'completed'
+                                ? Icons.event_available
+                                : Icons.cancel,
+                            size: 32,
+                            color: r.status == 'pending'
+                                ? Colors.orange
+                                : r.status == 'confirmed'
+                                ? Colors.green
+                                : r.status == 'completed'
+                                ? Colors.blue
+                                : Colors.red,
                           ),
 
                           const SizedBox(width: 16),
@@ -207,7 +174,7 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
                               children: [
                                 //  nom restaurant
                                 Text(
-                                  r['restaurant_name'],
+                                  r.restaurantName,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -222,7 +189,7 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
                                     const Icon(Icons.location_on, size: 14),
                                     const SizedBox(width: 4),
                                     Text(
-                                      r['restaurant_city'],
+                                      r.restaurantCity,
                                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                     ),
                                   ],
@@ -237,7 +204,7 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
                                     const SizedBox(width: 4),
                                     Text(
                                       DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR')
-                                          .format(DateTime.parse(r['datetime'])),
+                                          .format(r.datetime),
                                     ),
 
                                     const SizedBox(width: 12),
@@ -245,7 +212,7 @@ class _HomeClientPageScreenState extends State<HomeClientPageScreen> {
                                     const Icon(Icons.people, size: 16),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${r['number_of_guests']} convives',
+                                      '${r.numberOfGuests} convives',
                                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                     ),
                                   ],

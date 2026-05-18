@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
-import 'package:prbd_2526_c03/models/restaurant_service.dart';
+import '../../providers/restaurant_services_provider.dart';
 
 
-class RestaurantDetailsPageScreen extends StatefulWidget {
-
+class RestaurantDetailsPageScreen extends ConsumerStatefulWidget {
   final RestaurantSearchResult restaurant;
 
   const RestaurantDetailsPageScreen({
@@ -14,30 +14,20 @@ class RestaurantDetailsPageScreen extends StatefulWidget {
   });
 
   @override
-  State<RestaurantDetailsPageScreen> createState() =>
-    _RestaurantDetailsPageScreenState();
+  ConsumerState<RestaurantDetailsPageScreen> createState() =>
+      _RestaurantDetailsPageScreenState();
+}
+
+class _RestaurantDetailsPageScreenState extends ConsumerState<RestaurantDetailsPageScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.read(restaurantServicesProvider.notifier).loadServices(widget.restaurant.id);
+    });
   }
-
-  class _RestaurantDetailsPageScreenState extends State<RestaurantDetailsPageScreen> {
-    List<RestaurantService> services = [];
-    bool isLoadingServices = true;
-
-    @override
-    void initState() {
-      super.initState();
-      loadServices();
-    }
-
-    Future<void> loadServices() async {
-      final result = await RestaurantService.getByRestaurant(widget.restaurant.id);
-
-      if (!mounted) return;
-      setState(() {
-        services = result;
-        isLoadingServices = false;
-      });
-
-    }
 
     String getDayName(int day) {
       switch (day) {
@@ -59,7 +49,6 @@ class RestaurantDetailsPageScreen extends StatefulWidget {
           return '';
       }
     }
-
     String formatTime(String time) {
       return time.substring(0, 5);
     }
@@ -67,6 +56,7 @@ class RestaurantDetailsPageScreen extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
     final restaurant = widget.restaurant;
+    final servicesAsync =  ref.watch( restaurantServicesProvider);
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -84,7 +74,9 @@ class RestaurantDetailsPageScreen extends StatefulWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: () {
+              ref.read(restaurantServicesProvider.notifier).loadServices(restaurant.id);
+            },
           ),
         ],
         elevation: 2,
@@ -164,36 +156,46 @@ class RestaurantDetailsPageScreen extends StatefulWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              if (isLoadingServices)
-                const SizedBox.shrink()
-              else if (services.isEmpty)
-                const Text('Aucun horaire disponible')
-              else
-                Column(
-                  children: services.map((service) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 90,
-                            child: Text(
-                              getDayName(service.dayOfWeek),
-                              style: const TextStyle(fontWeight: FontWeight.w500),
+              servicesAsync.when(
+                data: (services) {
+                  if (services.isEmpty) {
+                    return const Text('Aucun horaire disponible');
+                  }
+                  return Column(
+                    children: services.map((service) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 90,
+                              child: Text(
+                                getDayName(service.dayOfWeek),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '${formatTime(service.startTime)} - ${formatTime(service.endTime)}',
-                              style: const TextStyle(fontFamily: 'monospace'),
+                            Expanded(
+                              child: Text(
+                                '${formatTime(service.startTime)} - ${formatTime(service.endTime)}',
+                                style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (error, stackTrace) {
+                  return const Text('Impossible de charger les horaires');
+                },
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
