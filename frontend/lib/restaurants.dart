@@ -1,95 +1,58 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:prbd_2526_c03/core/services/api_client.dart';
 
-const throttleDuration = Duration(seconds: 1);
-
-String get baseUrl => kIsWeb || !Platform.isAndroid
-    ? 'http://localhost:3000'
-    : 'http://10.0.2.2:3000';
-
-class WordPair {
+class Restaurants {
   final int id;
-  final String first;
-  final String second;
+  final String name;
+  final String address;
+  final String city;
+  final String phone;
+  final String description;
+  final double? rating;
+  final int? priceRange;
+  final int slotDuration;
 
-  WordPair({
+  const Restaurants({
     required this.id,
-    required this.first,
-    required this.second,
+    required this.name,
+    required this.address,
+    required this.city,
+    required this.phone,
+    required this.description,
+    this.rating,
+    this.priceRange,
+    required this.slotDuration,
   });
 
-  factory WordPair.fromJson(Map<String, dynamic> json) {
-    return WordPair(
+  factory Restaurants.fromJson(Map<String, dynamic> json) {
+    return Restaurants(
       id: json['id'],
-      first: json['first_word'],
-      second: json['second_word'],
+      name: json['name'],
+      address: json['address'],
+      city: json['city'],
+      phone: json['phone'],
+      description: json['description'],
+      rating: json['rating'],
+      priceRange: json['price_range'],
+      slotDuration: json['slot_duration'],
     );
   }
 
-  String get asLowerCase => first.toLowerCase() + second.toLowerCase();
-
-  @override
-  String toString() {
-    return '$id $first $second';
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is WordPair && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-  static Future<WordPair> getRandom() async {
+  static Future<List<Restaurants>> getMyRestaurants() async {
     // Simuler un delai
     await Future.delayed(throttleDuration);
 
     final response =
-    await http.get(Uri.parse('$baseUrl/rpc/get_random_pair'));
-
-    if (response.statusCode == 200) {
-      return WordPair.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to get random word pair');
-    }
-  }
-
-  static Future<List<WordPair>> getFavorites() async {
-    // Simuler un delai
-    await Future.delayed(throttleDuration);
-
-    final response =
-    await http.get(Uri.parse('$baseUrl/rpc/get_favorites'));
+      await ApiClient.get('get_my_restaurants_test');
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
       return body
-          .map((dynamic item) => WordPair.fromJson(item))
+          .map((dynamic item) => Restaurants.fromJson(item))
           .toList();
     } else {
       throw Exception('Failed to get favorites pairs');
     }
   }
 
-  Future<void> toggleFavorite() async {
-    // Simuler un delai
-    await Future.delayed(throttleDuration);
-
-    final response = await http.post(
-      Uri.parse('$baseUrl/rpc/toggle_favorite'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: json.encode({'idpair': id}),
-    );
-
-    if (response.statusCode != 204) {
-      throw Exception('Failed to toggle favorite');
-    }
-
-
-  }
 }
