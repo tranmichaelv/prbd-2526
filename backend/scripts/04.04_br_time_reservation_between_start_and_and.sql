@@ -33,12 +33,15 @@ begin
 end;
 $$ LANGUAGE plpgsql;
 
-create or replace trigger tg_datetime_between_start_and_endtime
+create or replace trigger tg_datetime_between_start_and_endtime_reservations
     before insert or update
     on reservations
     for each row
 execute function datetime_between_start_and_endtime();
 
-begin;
-    update reservations set status = ('confirmed') where id = 5;
+create or replace trigger tg_datetime_between_start_and_endtime_services
+    before delete or update
+    on services
+    for each row
+execute function datetime_between_start_and_endtime();
 rollback;
