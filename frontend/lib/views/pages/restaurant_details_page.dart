@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/views/pages/add_reservation_page.dart';
 import '../../providers/restaurant_services_provider.dart';
 
 
@@ -200,7 +201,12 @@ class _RestaurantDetailsPageScreenState extends ConsumerState<RestaurantDetailsP
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ReservationAddPage(restaurant: restaurant,))
+                    );
+                  },
                   icon: const Icon(Icons.add),
                   label: const Text('Réserver'),
                   style: ElevatedButton.styleFrom(
