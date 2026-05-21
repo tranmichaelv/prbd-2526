@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/my_restaurants_provider.dart';
-import 'package:prbd_2526_c03/restaurants.dart';
+import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/providers/my_restaurants_provider.dart';
 
 
 void main() async {
@@ -42,7 +42,7 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
     );
   }
 
-    Widget data(List<Restaurants> restaurants, MyRestaurantsNotifier notifier, dynamic theme, DateTime simulatedTime) {
+    Widget data(List<RestaurantSearchResult> restaurants, MyRestaurantsNotifier notifier, dynamic theme, DateTime simulatedTime) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Mes restaurants'),
@@ -51,7 +51,9 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: 'Rafraîchir les données',
-              onPressed: () {},
+              onPressed: () {
+                notifier.getMyRestaurants();
+              },
             ),
             IconButton(
               icon: const Icon(Icons.logout),
@@ -128,25 +130,34 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
                                 .grey),
                             const SizedBox(width: 4),
                             Text(
-                              'Dernière réservation: mer. 04/12/2024',
+                              restaurant.lastReservationAt != null
+                                  ? "Dernière réservation: ${DateFormat('EEE', 'fr_FR').format(restaurant.lastReservationAt!)} "
+                                  "${DateFormat('dd/MM/yyyy').format(restaurant.lastReservationAt!)}"
+                                  : "",
                               style: TextStyle(
                                   fontSize: 12, color: Colors.grey[600]),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.pending, size: 14, color: Colors.orange),
-                            SizedBox(width: 4),
-                            Text(
-                              '2 demandes en attente',
-                              style: TextStyle(
-                                fontSize: 12,
+                            if (restaurant.pendingRequestsCount > 0) ...[
+                              Icon(
+                                Icons.pending,
+                                size: 14,
                                 color: Colors.orange,
-                                fontWeight: FontWeight.w500,
                               ),
-                            ),
+                              SizedBox(width: 4),
+                              Text(
+                                "${restaurant.pendingRequestsCount} demandes en attente",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],

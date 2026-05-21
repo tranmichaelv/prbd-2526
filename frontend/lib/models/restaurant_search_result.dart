@@ -75,4 +75,21 @@ class RestaurantSearchResult {
       throw Exception('Failed to search restaurants: ${response.statusCode} ${response.body}',);
     }
   }
+
+  static Future<List<RestaurantSearchResult>> getMyRestaurants() async {
+    // Simuler un delai
+    await Future.delayed(throttleDuration);
+
+    final response =
+    await ApiClient.get('get_my_restaurants_test');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body
+          .map((dynamic item) => RestaurantSearchResult.fromJson(item))
+          .toList();
+    } else {
+      throw Exception('Failed to get favorites pairs');
+    }
+  }
 }

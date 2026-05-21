@@ -14,9 +14,15 @@ begin
            select *
            from services s
            where s.restaurant = new.restaurant
-           and s.day_of_week = day
-           and new.datetime::time >= s.start_time
-           and new.datetime::time < s.end_time
+             and s.day_of_week = day
+             and (
+               (s.start_time <= s.end_time and new.datetime::time between s.start_time and s.end_time)
+                   or
+               (s.start_time > s.end_time and (
+                   new.datetime::time >= s.start_time
+                       or new.datetime::time <= s.end_time
+                   ))
+               )
        ) then
            raise exception 'Reservation datetime % is outside service hours for restaurant %',
                new.datetime, new.restaurant;
