@@ -4,6 +4,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/providers/my_restaurants_provider.dart';
+import 'package:prbd_2526_c03/views/pages/reservation_details_manage.dart';
+import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
 
 
 void main() async {
@@ -16,14 +19,14 @@ void main() async {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: MyRestaurantsMockupScreen(),
+        home: MyRestaurantsPageScreen(),
       ),
     ),
   );
 }
 
-class MyRestaurantsMockupScreen extends ConsumerWidget {
-  const MyRestaurantsMockupScreen({super.key});
+class MyRestaurantsPageScreen extends ConsumerWidget {
+  const MyRestaurantsPageScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,7 +37,10 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
     return asyncState.when(
-        data: (state) => data(state, notifier, theme, simulatedTime),
+        data: (state) =>  Builder(
+          builder: (context) =>
+              data(state, notifier, theme, simulatedTime, context),
+        ),
         error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -42,7 +48,7 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
     );
   }
 
-    Widget data(List<RestaurantSearchResult> restaurants, MyRestaurantsNotifier notifier, dynamic theme, DateTime simulatedTime) {
+    Widget data(List<RestaurantSearchResult> restaurants, MyRestaurantsNotifier notifier, dynamic theme, DateTime simulatedTime, BuildContext context) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Mes restaurants'),
@@ -163,7 +169,17 @@ class MyRestaurantsMockupScreen extends ConsumerWidget {
                       ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RestaurantManagementReservationsPageScreen(
+                                  restaurantId: restaurant.id
+                              ),
+                        ),
+                      );
+                    },
                   ),
                 ),
             ],

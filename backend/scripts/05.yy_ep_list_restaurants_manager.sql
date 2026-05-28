@@ -1,30 +1,11 @@
 set search_path to public, auth;
 
-create or replace function get_my_restaurants(manager_id integer)
-    returns setof restaurants as
-$$
-    select *
-    from restaurants
-    where id in (select restaurant
-                 from restaurant_managers
-                 where manager = manager_id);
-$$ language sql security definer;
-
-
-drop function if exists get_my_restaurants(manager_id integer);
-grant execute on function get_my_restaurants(integer) to anon, manager;
-revoke execute on function get_my_restaurants(integer) from anon, manager;
-
-select * from restaurants;
-select * from restaurant_managers;
-select * from pg_roles;
-
 create or replace function get_my_restaurants_test()
     returns setof restaurant_search_info as
 
 $$
     begin
-        perform auth.check_manager_logged();
+--         perform auth.check_manager_logged();
     return query
         select rest.id,
                   rest.name,
@@ -47,20 +28,23 @@ $$
 
            from restaurants rest
             join restaurant_managers rm on rest.id = rm.restaurant
-           where rest.id = auth.id()
+--            where rm.manager = auth.id()
+        where rm.manager = 2
            order by last_reservation_at desc nulls last,
                     pending_requests_count desc,
                     rest.name;
     end;
 $$ language plpgsql security definer ;
 
-grant execute on function get_my_restaurants_test() to manager;
-revoke execute on function get_my_restaurants_test() from anon;
+-- a mettre apres quand login ok
+-- grant execute on function get_my_restaurants_test() to authenticated;
+grant execute on function get_my_restaurants_test() to anon;
+
 
 -- tests
-select auth.login_for_test('boverhaegen@epfc.eu');
-select get_my_restaurants_test();
-select current_user, auth.id(), auth.email(), auth.role();
-select auth.check_manager_logged();
-select * from users;
-select auth.logout_for_test();
+-- select auth.login_for_test('boverhaegen@epfc.eu');
+-- select get_my_restaurants_test();
+-- select current_user, auth.id(), auth.email(), auth.role();
+-- select auth.check_manager_logged();
+-- select auth.logout_for_test();
+-- select * from users;

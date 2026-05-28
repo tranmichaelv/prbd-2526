@@ -13,6 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.6.0
+  hooks_riverpod: ^3.2.0
+  jwt_decoder: ^2.0.1
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.8

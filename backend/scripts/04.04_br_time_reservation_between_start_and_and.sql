@@ -4,30 +4,18 @@ set search_path to public;
 create or replace function datetime_between_start_and_endtime()
 returns trigger as
 $$
-declare
-    day int;
 begin
-   if new.status in ('confirmed', 'completed', 'pending') then
-       day := extract(isodow from new.datetime );
-
-       if not exists(
+       if exists(
            select *
            from services s
-           where s.restaurant = new.restaurant
-             and s.day_of_week = day
-             and (
-               (s.start_time <= s.end_time and new.datetime::time between s.start_time and s.end_time)
-                   or
-               (s.start_time > s.end_time and (
-                   new.datetime::time >= s.start_time
-                       or new.datetime::time <= s.end_time
-                   ))
-               )
+           join reservations r on r.restaurant = s.restaurant
+            where s.day_of_week = extract(isodow from r.datetime)
+            and r.status in ('confirmed', 'completed', 'pending')
+            and r.datetime::time not between s.start_time AND s.end_time
        ) then
            raise exception 'Reservation datetime % is outside service hours for restaurant %',
                new.datetime, new.restaurant;
         end if;
-    end if;
 
     return new;
 end;
