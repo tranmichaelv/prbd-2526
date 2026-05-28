@@ -245,6 +245,31 @@ begin
 end;
 $$ language plpgsql;
 
+/*
+ Vérifie si un admin est connecté
+ */
+
+create or replace function auth.check_manager_logged()
+    returns void as
+$$
+begin
+    if not auth.is_manager() then
+        raise exception 'You must be logged with an admin role';
+    end if;
+end
+$$ language plpgsql;
+
+/*
+ Vérifie si l'utilisateur connecté est un admin
+ */
+
+create or replace function auth.is_manager()
+    returns bool as
+$$
+begin
+    return auth.role() is not null and auth.role() = 'manager';
+end
+$$ language plpgsql;
 
 grant execute on function auth.login_anonymously_for_test() to anon;
 grant execute on function auth.login_for_test(text) to anon;
@@ -252,3 +277,6 @@ grant execute on function auth.logout_for_test() to anon;
 grant execute on function auth.id() to anon;
 grant execute on function auth.email() to anon;
 grant execute on function auth.role() to anon;
+grant execute on function auth.check_manager_logged() to anon;
+grant execute on function auth.is_manager() to anon;
+
