@@ -8,8 +8,7 @@ begin
     if exists (
         select 1
         from reservations r
-        where r.restaurant = old.restaurant
-          and r.status in ('confirmed','completed','pending')
+        where r.status in ('confirmed','completed','pending')
           and not exists (
             select 1
             from services s
