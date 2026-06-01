@@ -1,30 +1,30 @@
 import 'dart:convert';
 import 'package:prbd_2526_c03/core/services/api_client.dart';
-import 'package:prbd_2526_c03/models/Table.dart';
+import 'package:prbd_2526_c03/models/tables.dart';
 
 class ReservationsManager {
   final int id;
   final String clientName;
   final String clientEmail;
-  final String clientPhone;
+  final String? clientPhone;
   final String restaurantName;
   final DateTime datetime;
   final int numberOfGuests;
   final String status;
   final String? specialRequests;
-  final List<Table> tables;
+  final List<Tables>? tables;
 
   const ReservationsManager({
     required this.id,
     required this.clientName,
     required this.clientEmail,
-    required this.clientPhone,
+    this.clientPhone,
     required this.restaurantName,
     required this.datetime,
     required this.numberOfGuests,
     required this.status,
     this.specialRequests,
-    required this.tables,
+    this.tables,
   });
 
   factory ReservationsManager.fromJson(Map<String, dynamic> json) {
@@ -38,9 +38,9 @@ class ReservationsManager {
       numberOfGuests: json['number_of_guests'],
       status: json['status'],
       specialRequests: json['special_requests'],
-      tables: (json['tables'] as List<dynamic>)
-          .map((e) => Table.fromJson(e))
-          .toList(),
+      tables: (json['tables'] as List?)
+          ?.map((e) => Tables.fromJson(e))
+          .toList() ?? [],
     );
   }
 

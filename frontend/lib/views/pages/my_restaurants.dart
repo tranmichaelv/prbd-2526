@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
-import 'package:prbd_2526_c03/providers/my_restaurants_provider.dart';
-import 'package:prbd_2526_c03/views/pages/reservation_details_manage.dart';
-import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
+import 'package:prbd_2526_c03/models/ManagerState.dart';
+import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
 
 
@@ -30,25 +28,32 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncState = ref.watch(myRestaurantsProvider);
-    final notifier = ref.read(myRestaurantsProvider.notifier);
+    final asyncState = ref.watch(managerStateProvider);
+    final notifier = ref.read(managerStateProvider.notifier);
+
+    // final selectedRestaurantNotifier = ref.read(selectedRestaurantProvider.notifier);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
+    // return asyncState.when(
+    //   data: (state) => data(context, state, notifier, selectedRestaurantNotifier, theme, simulatedTime, ref),
+    //   error: (err, _) => error(err, StackTrace.current, notifier),
+    //   loading: () => const Scaffold(
+    //     body: Center(child: CircularProgressIndicator()),
+    //   ),
+    // );
+
     return asyncState.when(
-        data: (state) =>  Builder(
-          builder: (context) =>
-              data(state, notifier, theme, simulatedTime, context),
-        ),
-        error: (err, _) => error(err, StackTrace.current, notifier),
+      data: (state) => data(context, state, notifier, theme, simulatedTime, ref),
+      error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
     );
   }
 
-    Widget data(List<RestaurantSearchResult> restaurants, MyRestaurantsNotifier notifier, dynamic theme, DateTime simulatedTime, BuildContext context) {
+    Widget data(BuildContext context, ManagerState restaurants, ManagerStateNotifier notifier, dynamic theme, DateTime simulatedTime, WidgetRef ref) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Mes restaurants'),
@@ -58,7 +63,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
               icon: const Icon(Icons.refresh),
               tooltip: 'Rafraîchir les données',
               onPressed: () {
-                notifier.getMyRestaurants();
+                notifier.refreshMyResto();
               },
             ),
             IconButton(
@@ -98,7 +103,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             children: [
 
-              for (var restaurant in restaurants)
+              for (var restaurant in restaurants.restaurants)
                 Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
@@ -170,16 +175,16 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              RestaurantManagementReservationsPageScreen(
-                                  restaurantId: restaurant.id
-                              ),
-                        ),
-                      );
-                    },
+                      notifier.selectRestaurant(restaurant);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RestaurantManagementReservationsPageScreen(
+                                ),
+                          ),
+                        );
+                      }
                   ),
                 ),
             ],
@@ -191,7 +196,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
   Widget error(
       Object error,
       StackTrace stackTrace,
-      MyRestaurantsNotifier notifier,
+      ManagerStateNotifier notifier,
       ) {
     return Center(
       child: Column(
@@ -209,7 +214,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
           SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              notifier.getMyRestaurants();
+              notifier.build();
             },
             child: Text('Retry'),
           ),

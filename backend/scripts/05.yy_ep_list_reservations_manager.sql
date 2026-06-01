@@ -3,6 +3,14 @@ set search_path to public, auth;
 drop type if exists reservation_info_manager cascade;
 drop type if exists table_info cascade;
 
+create type table_info as
+(
+    id integer,
+    restaurant integer,
+    table_number integer,
+    capacity integer
+);
+
 create type reservation_info_manager as
 (
     id integer,
@@ -17,16 +25,8 @@ create type reservation_info_manager as
     tables table_info[]
 );
 
-create type table_info as
-    (
-        id integer,
-        restaurant integer,
-        table_number integer,
-        capacity integer
-    );
 
-
-drop function if exists get_reservations_from_resto_manager(_restaurant_id integer)
+drop function if exists get_reservations_from_resto_manager(_restaurant_id integer);
 create or replace function get_reservations_from_resto_manager(_restaurant_id integer)
     returns setof reservation_info_manager as
 $$

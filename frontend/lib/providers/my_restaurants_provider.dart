@@ -34,4 +34,19 @@ class MyRestaurantsNotifier extends AsyncNotifier<List<RestaurantSearchResult>> 
     }
   }
 
+  // Future<void> selectRestaurant(RestaurantSearchResult selectedRestaurant) async {
+  //   state = const AsyncLoading();
+  //   try {
+  //     final List<RestaurantSearchResult> restaurant = [selectedRestaurant];
+  //     state = AsyncData(restaurant);
+  //   } catch (e) {
+  //     state = AsyncValue.error(
+  //       "Something went wrong!\nPlease try again later.",
+  //       StackTrace.current,
+  //     );
+  //   }
+  // }
+
+
+
 }
