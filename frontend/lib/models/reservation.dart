@@ -1,0 +1,55 @@
+import 'dart:convert';
+import 'package:prbd_2526_c03/core/services/api_client.dart';
+
+class Reservation {
+  final int id;
+  final String restaurantName;
+  final String restaurantCity;
+  final String restaurantAddress;
+  final String restaurantPhone;
+  final DateTime datetime;
+  final int numberOfGuests;
+  final String status;
+  final String? specialRequests;
+
+  const Reservation({
+    required this.id,
+    required this.restaurantName,
+    required this.restaurantCity,
+    required this.restaurantAddress,
+    required this.restaurantPhone,
+    required this.datetime,
+    required this.numberOfGuests,
+    required this.status,
+    this.specialRequests,
+  });
+
+  factory Reservation.fromJson(Map<String, dynamic> json) {
+    return Reservation(
+      id: json['id'] as int,
+      restaurantName: json['restaurant_name'] as String,
+      restaurantCity: json['restaurant_city'] as String,
+      restaurantAddress: json['restaurant_address'] as String,
+      restaurantPhone: json['restaurant_phone'] as String,
+      datetime: DateTime.parse(json['datetime'] as String),
+      numberOfGuests: json['number_of_guests'] as int,
+      status: json['status'] as String,
+      specialRequests: json['special_requests'] as String?,
+    );
+  }
+
+  static Future<List<Reservation>> getReservations() async {
+    final response = await ApiClient.get('get_reservations');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return body
+          .map((dynamic item) => Reservation.fromJson(item))
+          .toList();
+    }
+
+    throw Exception(
+      'Failed to load reservations: ${response.statusCode} ${response.body}',
+    );
+  }
+}
