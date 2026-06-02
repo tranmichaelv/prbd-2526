@@ -17,8 +17,7 @@ begin
               and r.datetime::time between s.start_time and s.end_time
         )
     ) then
-           raise exception 'Reservation datetime % is outside service hours for restaurant %',
-               new.datetime, new.restaurant;
+           raise exception 'Reservation datetime is outside service hours for restaurant ';
         end if;
 
     return new;
@@ -32,13 +31,13 @@ where s.restaurant = 2
   and time '20:00:00' between s.start_time and s.end_time;
 
 create or replace trigger tg_datetime_between_start_and_endtime_reservations
-    before insert or update
+    after insert or update
     on reservations
     for each row
 execute function datetime_between_start_and_endtime();
 
 create or replace trigger tg_datetime_between_start_and_endtime_services
-    before delete or update
+    after delete or update
     on services
     for each row
 execute function datetime_between_start_and_endtime();
