@@ -25,12 +25,15 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/05.04_ep_available_slots.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.05_ep_restaurant_tables.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.06_ep_list_restaurants_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.07_ep_cancel_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.08_ep_delete_restaurant_service.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.09_ep_list_assign_table.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.10_ep_list_complete_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.11_ep_list_confirm_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.12_ep_list_reservations_manager.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.13_ep_list_tables_manager.sql" />
-
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.14_ep_save_edit_restaurant_service.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.15_ep_save_table.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.16_ep_simulated_time.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-c03&quot;" />

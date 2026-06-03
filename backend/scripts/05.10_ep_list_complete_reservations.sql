@@ -1,7 +1,7 @@
 set search_path to public, auth;
 
-drop function if exists cancel_reservation(_reservation_id int);
-create or replace function cancel_reservation(_reservation_id int)
+drop function if exists manager_cancel_reservation(_reservation_id int);
+create or replace function manager_cancel_reservation(_reservation_id int)
     returns void as
 
 $$
@@ -13,6 +13,6 @@ begin
 end;
 $$ language plpgsql security definer ;
 
-grant execute on function  cancel_reservation(_reservation_id int) to authenticated;
+grant execute on function  manager_cancel_reservation(_reservation_id int) to authenticated;
 
 

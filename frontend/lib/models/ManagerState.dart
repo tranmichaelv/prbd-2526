@@ -137,7 +137,7 @@ class ManagerState {
 
   static Future<void> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
-      'cancel_reservation',
+      'manager_cancel_reservation',
       body: json.encode({'_reservation_id': reservationId,}),
     );
     if (response.statusCode == 200 || response.statusCode == 204) {
