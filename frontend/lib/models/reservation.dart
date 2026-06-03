@@ -123,8 +123,7 @@ class Reservation {
       }),
     );
 
-    print('UPDATE RESERVATION STATUS: ${response.statusCode}');
-    print('UPDATE RESERVATION BODY: ${response.body}');
+
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(

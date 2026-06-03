@@ -473,7 +473,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                             (route) => false,
                       );
                     } catch (e) {
-                      print('ERREUR UPDATE/ADD RESERVATION: $e');
+                      // print('ERREUR UPDATE/ADD RESERVATION: $e');
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(

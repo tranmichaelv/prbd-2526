@@ -309,16 +309,10 @@ class _LoginState extends ConsumerState<LoginPage> {
       await ref.read(authProvider.notifier).login(mail,password);
 
       final user = ref.read(authProvider);
-      print('USER CONNECTÉ ID: ${user?.id}');
-      print('USER CONNECTÉ EMAIL: ${user?.email}');
-      print('USER CONNECTÉ ROLE: ${user?.role}');
       if (!context.mounted) return;
 
       Navigator.pushReplacementNamed(context, '/home');
-      // print('Tentative login avec : $mail');
-      // print('Token recu: $token');
     } catch (e) {
-      print('Erreur login: $e');
 
         if (!context.mounted) return;
 

@@ -291,7 +291,7 @@ class SignupState extends State<SignupPage> {
 
     } catch (e) {
 
-      print('erreur signup: $e');
+      // print('erreur signup: $e');
 
       if (!context.mounted) return;
 

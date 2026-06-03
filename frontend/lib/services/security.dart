@@ -14,8 +14,8 @@ class Security {
       'email': mail,
       'password': password
     }));
-    print('STATUS: ${response.statusCode}');
-    print('BODY: ${response.body}');
+    // print('STATUS: ${response.statusCode}');
+    // print('BODY: ${response.body}');
     if (response.statusCode != 200) {
       throw Exception('Email ou mot de passe incorrect');
     }
@@ -64,8 +64,8 @@ class Security {
       }),
     );
 
-    print('checkFullName status: ${response.statusCode}');
-    print('checkFullName body: ${response.body}');
+    // print('checkFullName status: ${response.statusCode}');
+    // print('checkFullName body: ${response.body}');
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Erreur vérification nom complet: ${response.body}');
@@ -91,8 +91,8 @@ class Security {
       anonymous: true,
     );
 
-    print('signup status: ${response.statusCode}');
-    print('signup body: ${response.body}');
+    // print('signup status: ${response.statusCode}');
+    // print('signup body: ${response.body}');
 
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
