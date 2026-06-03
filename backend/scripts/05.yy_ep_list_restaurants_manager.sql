@@ -1,11 +1,11 @@
 set search_path to public, auth;
 
-create or replace function get_my_restaurants_test()
+create or replace function get_my_restaurants_test(_user_id int)
     returns setof restaurant_search_info as
 
 $$
     begin
-        perform auth.check_manager_logged();
+
     return query
         select rest.id,
                   rest.name,
@@ -30,13 +30,15 @@ $$
            from restaurants rest
             join restaurant_managers rm on rest.id = rm.restaurant
 --            where rm.manager = auth.id()
-        where rm.manager = 2
+        where rm.manager = _user_id
            order by last_reservation_at desc nulls last,
                     pending_requests_count desc,
                     rest.name;
     end;
 $$ language plpgsql security definer ;
 
-grant execute on function get_my_restaurants_test() to authenticated;
+grant execute on function get_my_restaurants_test(_user_id int) to authenticated, anon;
+
+select * from auth.check_manager_logged();
 
 

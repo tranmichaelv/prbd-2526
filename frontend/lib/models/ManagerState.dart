@@ -68,24 +68,34 @@ class ManagerState {
     );
   }
 
-  static Future<ManagerState> getMyRestaurants() async {
+  static Future<ManagerState> getMyRestaurants(int userId) async {
     // Simuler un delai
-    await Future.delayed(throttleDuration);
+    try {
+      await Future.delayed(throttleDuration);
 
-    final response =
-    await ApiClient.get('get_my_restaurants_test');
-
-    if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      final restaurants = body
-          .map((dynamic item) => RestaurantSearchResult.fromJson(item))
-          .toList();
-      return ManagerState(
-        restaurants: restaurants,
+      final response = await ApiClient.post(
+        'get_my_restaurants_test',
+        anonymous: true,
+        body: json.encode({'_user_id': userId,
+        }),
       );
-    } else {
-      throw Exception('Failed to get favorites pairs');
+
+
+      if (response.statusCode == 200) {
+        final List<dynamic> body = json.decode(response.body);
+        final restaurants = body
+            .map((dynamic item) => RestaurantSearchResult.fromJson(item))
+            .toList();
+        return ManagerState(
+          restaurants: restaurants,
+        );
+      } else {
+        throw Exception('Failed to get favorites pairs');
+      }
+    }catch (e) {
+      print(e);
     }
+    return ManagerState();
   }
 
   static Future<List<ReservationsManager>> getReservationsFromRestaurant(int restaurantId) async {

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
 import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
@@ -64,7 +65,17 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.logout),
               tooltip: 'Déconnexion (Benoît P.)',
-              onPressed: () {},
+              onPressed: () async {
+                await ref.read(authProvider.notifier).logout();
+
+                if (!context.mounted) return;
+
+                Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login',
+                        (route) => false
+                );
+              },
             ),
           ],
           elevation: 2,

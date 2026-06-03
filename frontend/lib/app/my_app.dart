@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prbd_2526_c03/views/pages/home_client_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:prbd_2526_c03/views/pages/login_page.dart';
+import 'package:prbd_2526_c03/views/pages/my_restaurants.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomeClientPageScreen(),
+        '/manager': (context) => const MyRestaurantsPageScreen(),
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

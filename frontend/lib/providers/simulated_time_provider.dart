@@ -12,9 +12,7 @@ class SimulatedTimeNotifier extends Notifier<SimulatedTimeState> {
   @override
   SimulatedTimeState build() {
     try {
-      state = SimulatedTimeState();
-      getSimulatedTime();
-      return state;
+      return SimulatedTimeState();
     } catch (e) {
       throw "Something went wrong!\nPlease try again later.";
     }
