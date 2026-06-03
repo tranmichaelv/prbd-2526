@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservation.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
+import 'package:prbd_2526_c03/views/pages/add_reservation_page.dart';
 
 class ReservationDetailsPageScreen extends ConsumerStatefulWidget {
   final Reservation reservation;
@@ -320,7 +321,14 @@ class _ReservationDetailsPageScreenState
                       child: ElevatedButton.icon(
                         onPressed: canEdit
                             ? () {
-                          // TODO: aller vers la page de modification
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReservationAddPage(
+                                reservation: reservation,
+                              ),
+                            ),
+                          );
                         }
                             : null,
                         icon: const Icon(Icons.edit),

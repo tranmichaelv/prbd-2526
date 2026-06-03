@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import 'package:prbd_2526_c03/models/reservation.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/providers/available_slots_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 
 class ReservationAddPage extends ConsumerStatefulWidget {
-  final RestaurantSearchResult restaurant;
+  final RestaurantSearchResult? restaurant;
+  final Reservation? reservation;
 
   const ReservationAddPage({
     super.key,
-    required this.restaurant
-  });
+    this.restaurant,
+    this.reservation,
+  }) : assert(restaurant != null || reservation != null);
 
   @override
   ConsumerState<ReservationAddPage> createState() => _ReservationAddPageState();
@@ -24,24 +27,100 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
 
   int numberOfGuests = 2;
 
+  final TextEditingController specialRequestsController =
+  TextEditingController();
+
+  final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+
+  bool get isEdit => widget.reservation != null;
+
+  int get restaurantId {
+    if (isEdit) {
+      return widget.reservation!.restaurantId;
+    }
+
+    return widget.restaurant!.id;
+  }
+
+  String get restaurantName {
+    if (isEdit) {
+      return widget.reservation!.restaurantName;
+    }
+
+    return widget.restaurant!.name;
+  }
+
+  DateTime get firstSelectableDate {
+    return DateTime(
+      simulatedTime.year,
+      simulatedTime.month,
+      simulatedTime.day,
+    );
+  }
+
+  String? get specialRequests {
+    final text = specialRequestsController.text.trim();
+
+    if (text.isEmpty) {
+      return null;
+    }
+
+    return text;
+  }
+
   @override
   void initState() {
     super.initState();
 
+    if (isEdit) {
+      selectedDate = widget.reservation!.datetime;
+      selectedSlot = widget.reservation!.datetime;
+      numberOfGuests = widget.reservation!.numberOfGuests;
+      specialRequestsController.text =
+          widget.reservation!.specialRequests ?? '';
+    }
+
     Future.microtask(() {
-      ref.read(availableSlotsProvider.notifier).loadSlots(
-        restaurantId: widget.restaurant.id,
-        date: selectedDate,
-      );
+      _loadSlots();
     });
+  }
+
+  void _loadSlots() {
+    ref.read(availableSlotsProvider.notifier).loadSlots(
+      restaurantId: restaurantId,
+      date: selectedDate,
+    );
+  }
+
+  void _changeDate(int days) {
+    final newDate = selectedDate.add(Duration(days: days));
+
+    if (newDate.isBefore(firstSelectableDate)) {
+      return;
+    }
+
+    setState(() {
+      selectedDate = newDate;
+      selectedSlot = null;
+    });
+
+    _loadSlots();
+  }
+
+  bool _sameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  @override
+  void dispose() {
+    specialRequestsController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final restaurant = widget.restaurant;
     final slotsAsync = ref.watch(availableSlotsProvider);
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,13 +130,15 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Nouvelle réservation'),
+        title: Text(
+          isEdit ? 'Modifier la réservation' : 'Nouvelle réservation',
+        ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: _loadSlots,
           ),
         ],
         elevation: 2,
@@ -94,15 +175,16 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                 Text(
-                  restaurant.name
-                  ,
-                  style: TextStyle(
+                Text(
+                  restaurantName,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 24),
+
                 Row(
                   children: [
                     Expanded(
@@ -111,11 +193,19 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                         child: InkWell(
                           onTap: () async {
                             final pickedDate = await showDatePicker(
-                                context: context,
-                                firstDate: simulatedTime,
-                                lastDate: simulatedTime.add(const Duration(days: 60)),
-                                locale : const Locale('fr', 'FR'),
+                              context: context,
+                              initialDate: selectedDate.isBefore(
+                                firstSelectableDate,
+                              )
+                                  ? firstSelectableDate
+                                  : selectedDate,
+                              firstDate: firstSelectableDate,
+                              lastDate: simulatedTime.add(
+                                const Duration(days: 60),
+                              ),
+                              locale: const Locale('fr', 'FR'),
                             );
+
                             if (pickedDate == null) return;
 
                             setState(() {
@@ -123,10 +213,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                               selectedSlot = null;
                             });
 
-                            ref.read(availableSlotsProvider.notifier).loadSlots(
-                              restaurantId: widget.restaurant.id,
-                              date: selectedDate,
-                            );
+                            _loadSlots();
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -142,7 +229,10 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                                     children: [
                                       const Text('Date'),
                                       Text(
-                                        DateFormat('EEEE d/MM/yyyy', 'fr_FR').format(selectedDate),
+                                        DateFormat(
+                                          'EEEE d/MM/yyyy',
+                                          'fr_FR',
+                                        ).format(selectedDate),
                                         style: theme.textTheme.bodySmall,
                                       ),
                                     ],
@@ -158,49 +248,57 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.remove),
-                      onPressed: () {},
+                      onPressed: () {
+                        _changeDate(-1);
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.add),
-                      onPressed: () {},
+                      onPressed: () {
+                        _changeDate(1);
+                      },
                     ),
                     const SizedBox(width: 16),
                   ],
                 ),
+
                 const Divider(),
-              slotsAsync.maybeWhen(
-                data: (slots) {
-                  if (slots.isEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.orange),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.warning, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Le restaurant est fermé ce jour-là.',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 13,
+
+                slotsAsync.maybeWhen(
+                  data: (slots) {
+                    if (slots.isEmpty) {
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.warning, color: Colors.orange),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Le restaurant est fermé ce jour-là.',
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                          ],
+                        ),
+                      );
+                    }
 
-                  return const SizedBox.shrink();
-                },
-                orElse: () => const SizedBox.shrink(),
-              ),
+                    return const SizedBox.shrink();
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                ),
+
                 const SizedBox(height: 24),
+
                 const Text(
                   'Créneaux disponibles',
                   style: TextStyle(
@@ -208,7 +306,9 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 slotsAsync.when(
                   loading: () => const Center(
                     child: CircularProgressIndicator(),
@@ -217,20 +317,36 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     'Impossible de charger les créneaux.',
                   ),
                   data: (slots) {
-                    if (slots.isEmpty) {
+                    final slotDates = slots
+                        .map((slot) => slot.slotDateTime)
+                        .toList();
+
+                    if (isEdit &&
+                        selectedSlot != null &&
+                        _sameDay(selectedSlot!, selectedDate) &&
+                        !slotDates.any(
+                              (date) => date.isAtSameMomentAs(selectedSlot!),
+                        )) {
+                      slotDates.add(selectedSlot!);
+                      slotDates.sort();
+                    }
+
+                    if (slotDates.isEmpty) {
                       return const Text('Aucun créneau disponible');
                     }
 
                     return Wrap(
                       spacing: 8.0,
                       runSpacing: 8.0,
-                      children: slots.map((slot) {
-                        final isSelected = selectedSlot == slot.slotDateTime;
+                      children: slotDates.map((slotDate) {
+                        final isSelected =
+                            selectedSlot != null &&
+                                selectedSlot!.isAtSameMomentAs(slotDate);
 
                         return InkWell(
                           onTap: () {
                             setState(() {
-                              selectedSlot = slot.slotDateTime;
+                              selectedSlot = slotDate;
                             });
                           },
                           child: Container(
@@ -253,7 +369,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                             ),
                             child: Center(
                               child: Text(
-                                DateFormat('HH:mm').format(slot.slotDateTime),
+                                DateFormat('HH:mm').format(slotDate),
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
@@ -271,22 +387,25 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     );
                   },
                 ),
+
                 const SizedBox(height: 24),
+
                 ListTile(
                   leading: const Icon(Icons.people),
                   title: const Text('Nombre de convives'),
-                  subtitle:  Text('$numberOfGuests'),
+                  subtitle: Text('$numberOfGuests'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove),
-                        onPressed: numberOfGuests > 1 ? () {
+                        onPressed: numberOfGuests > 1
+                            ? () {
                           setState(() {
                             numberOfGuests--;
                           });
                         }
-                        : null
+                            : null,
                       ),
                       IconButton(
                         icon: const Icon(Icons.add),
@@ -299,44 +418,11 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.warning, color: Colors.orange),
-                            const SizedBox(width: 8),
-                            const Expanded(
-                              child: Text(
-                                'Surréservation (capacité)',
-                                style: TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'La capacité du restaurant pour ce créneau pourrait être insuffisante pour le nombre de convives demandé.',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
                 const SizedBox(height: 16),
+
                 TextFormField(
+                  controller: specialRequestsController,
                   decoration: const InputDecoration(
                     labelText: 'Demandes spéciales (optionnel)',
                     border: OutlineInputBorder(),
@@ -344,45 +430,72 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                   ),
                   maxLines: 3,
                 ),
+
                 const SizedBox(height: 32),
+
                 ElevatedButton.icon(
                   onPressed: () async {
                     if (selectedSlot == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Veuillez choisir un créneau.')),
+                        const SnackBar(
+                          content: Text('Veuillez choisir un créneau.'),
+                        ),
                       );
                       return;
                     }
 
                     try {
-                      await Reservation.addReservation(
-                        restaurantId: widget.restaurant.id,
-                        datetime: selectedSlot!,
-                        numberOfGuests: numberOfGuests,
-                        specialRequests: null,
-                      );
-                      await ref.read(reservationsProvider.notifier).loadReservations();
+                      if (isEdit) {
+                        await Reservation.updateReservation(
+                          reservationId: widget.reservation!.id,
+                          datetime: selectedSlot!,
+                          numberOfGuests: numberOfGuests,
+                          specialRequests: specialRequests,
+                        );
+                      } else {
+                        await Reservation.addReservation(
+                          restaurantId: restaurantId,
+                          datetime: selectedSlot!,
+                          numberOfGuests: numberOfGuests,
+                          specialRequests: specialRequests,
+                        );
+                      }
+
+                      await ref
+                          .read(reservationsProvider.notifier)
+                          .loadReservations();
+
                       if (!context.mounted) return;
 
                       Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/home',
-                          (route) => false,
+                        context,
+                        '/home',
+                            (route) => false,
                       );
                     } catch (e) {
+                      print('ERREUR UPDATE/ADD RESERVATION: $e');
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Impossible de créer la réservation. ')),
+                        SnackBar(
+                          content: Text(
+                            isEdit
+                                ? 'Impossible de modifier la réservation.'
+                                : 'Impossible de créer la réservation.',
+                          ),
+                        ),
                       );
                     }
-
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Créer la réservation'),
+                  icon: Icon(isEdit ? Icons.edit : Icons.add),
+                  label: Text(
+                    isEdit
+                        ? 'Modifier la réservation'
+                        : 'Créer la réservation',
+                  ),
                 ),
               ],
             ),
@@ -391,6 +504,4 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
       ),
     );
   }
-
-
 }

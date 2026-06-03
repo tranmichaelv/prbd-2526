@@ -4,6 +4,7 @@ import 'package:prbd_2526_c03/services/api_client.dart';
 
 class Reservation {
   final int id;
+  final int restaurantId;
   final String restaurantName;
   final String restaurantCity;
   final String restaurantAddress;
@@ -15,6 +16,7 @@ class Reservation {
 
   const Reservation({
     required this.id,
+    required this.restaurantId,
     required this.restaurantName,
     required this.restaurantCity,
     required this.restaurantAddress,
@@ -27,6 +29,7 @@ class Reservation {
 
   Reservation copyWith({
     int? id,
+    int? restaurantId,
     String? restaurantName,
     String? restaurantCity,
     String? restaurantAddress,
@@ -38,6 +41,7 @@ class Reservation {
   }) {
     return Reservation(
       id: id ?? this.id,
+      restaurantId: restaurantId ?? this.restaurantId,
       restaurantName: restaurantName ?? this.restaurantName,
       restaurantCity: restaurantCity ?? this.restaurantCity,
       restaurantAddress: restaurantAddress ?? this.restaurantAddress,
@@ -52,6 +56,7 @@ class Reservation {
   factory Reservation.fromJson(Map<String, dynamic> json) {
     return Reservation(
       id: json['id'] as int,
+      restaurantId: json['restaurant_id'] as int,
       restaurantName: json['restaurant_name'] as String,
       restaurantCity: json['restaurant_city'] as String,
       restaurantAddress: json['restaurant_address'] as String,
@@ -102,10 +107,36 @@ class Reservation {
       }
 }
 
+  static Future<void> updateReservation({
+    required int reservationId,
+    required DateTime datetime,
+    required int numberOfGuests,
+    String? specialRequests,
+  }) async {
+    final response = await ApiClient.post(
+      'update_reservation',
+      body: jsonEncode({
+        '_reservation_id': reservationId,
+        '_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+        '_number_of_guests': numberOfGuests,
+        '_special_requests': specialRequests,
+      }),
+    );
+
+    print('UPDATE RESERVATION STATUS: ${response.statusCode}');
+    print('UPDATE RESERVATION BODY: ${response.body}');
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+        'Failed to update reservation: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
   static Future<int> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
       'cancel_reservation',
-      anonymous: true,
+      anonymous: false,
       body: jsonEncode({
         '_reservation_id': reservationId,
       }),
