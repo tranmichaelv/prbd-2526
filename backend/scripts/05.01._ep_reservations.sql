@@ -30,3 +30,19 @@ $$
 $$;
 
 grant execute on function get_reservations() to anon, authenticated;
+
+create or replace function add_reservation(_restaurant_id int, _datetime timestamp, _number_of_guests int, _special_requests text) returns void
+    as
+    $$
+    declare
+        _client int;
+        begin
+            -- _client := auth.id();
+            -- pour tester
+            _client = 6;
+            insert into reservations(client,restaurant, datetime, number_of_guests,status, special_requests)
+            values (_client,_restaurant_id,_datetime,_number_of_guests,'pending',_special_requests);
+        end;
+    $$ language plpgsql security definer ;
+-- anon juste pour tester
+grant execute on function add_reservation(int,timestamp,int,text) to anon, authenticated;

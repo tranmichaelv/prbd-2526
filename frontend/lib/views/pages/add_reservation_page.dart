@@ -167,29 +167,38 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                   ],
                 ),
                 const Divider(),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning, color: Colors.orange),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Le restaurant est fermé ce jour-là.',
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontSize: 13,
-                          ),
-                        ),
+              slotsAsync.maybeWhen(
+                data: (slots) {
+                  if (slots.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange),
                       ),
-                    ],
-                  ),
-                ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.warning, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Le restaurant est fermé ce jour-là.',
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
                 const SizedBox(height: 24),
                 const Text(
                   'Créneaux disponibles',
@@ -199,136 +208,67 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: [
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outline,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '12:00',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
+                slotsAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (error, stackTrace) => const Text(
+                    'Impossible de charger les créneaux.',
+                  ),
+                  data: (slots) {
+                    if (slots.isEmpty) {
+                      return const Text('Aucun créneau disponible');
+                    }
+
+                    return Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: slots.map((slot) {
+                        final isSelected = selectedSlot == slot.slotDateTime;
+
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              selectedSlot = slot.slotDateTime;
+                            });
+                          },
+                          child: Container(
+                            width: 80,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.outline,
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                DateFormat('HH:mm').format(slot.slotDateTime),
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                                  fontSize: 14,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outline,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '12:30',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.primary,
-                          width: 1,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '19:00',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outline,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '19:30',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outline,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '20:00',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 ListTile(
@@ -405,7 +345,34 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (selectedSlot == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Veuillez choisir un créneau.')),
+                      );
+                      return;
+                    }
+
+                    try {
+                      await Reservation.addReservation(
+                        restaurantId: widget.restaurant.id,
+                        datetime: selectedSlot!,
+                        numberOfGuests: numberOfGuests,
+                        specialRequests: null,
+                      );
+
+                      if (!context.mounted) return;
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Impossible de créer la réservation. ')),
+                      );
+                    }
+
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),

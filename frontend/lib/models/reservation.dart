@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/core/services/api_client.dart';
 
 class Reservation {
@@ -52,4 +53,28 @@ class Reservation {
       'Failed to load reservations: ${response.statusCode} ${response.body}',
     );
   }
+
+  static Future<void> addReservation({
+    required int restaurantId,
+    required DateTime datetime,
+    required int numberOfGuests,
+    String? specialRequests,
+}) async {
+      final response = await ApiClient.post(
+        'add_reservation',
+        body: jsonEncode({
+          '_restaurant_id': restaurantId,
+          '_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+          '_number_of_guests': numberOfGuests,
+          '_special_requests': specialRequests,
+        }),
+      );
+
+      print('ADD RESERVATION STATUS: ${response.statusCode}');
+      print('ADD RESERVATION BODY: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to add reservation: ${response.statusCode} ${response.body}');
+      }
+}
 }
