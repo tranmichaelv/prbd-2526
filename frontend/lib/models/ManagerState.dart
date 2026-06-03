@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:prbd_2526_c03/core/services/api_client.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
 
 class ManagerState {
@@ -15,6 +16,9 @@ class ManagerState {
   final String reservationFilter;
 
   final List<TablesExtended> tables;
+  final List<Tables> restaurantTables;
+  final Tables? selectedTable;
+
   final bool showSuccessMessage;
   final bool showCancelMessage;
   final bool showCompleteMessage;
@@ -27,6 +31,8 @@ class ManagerState {
     this.selectedReservation,
     this.reservationFilter = 'all',
     this.tables = const [],
+    this.restaurantTables = const [],
+    this.selectedTable,
     this.showSuccessMessage = false,
     this.showCancelMessage = false,
     this.showCompleteMessage = false,
@@ -39,6 +45,8 @@ class ManagerState {
     ReservationsManager? selectedReservation,
     String? reservationFilter,
     List<TablesExtended>? tables,
+    List<Tables>? restaurantTables,
+    Tables? selectedTable,
     bool? showSuccessMessage,
     bool? showCancelMessage,
     bool? showCompleteMessage,
@@ -52,6 +60,8 @@ class ManagerState {
       selectedReservation ?? this.selectedReservation,
       reservationFilter: reservationFilter ?? this.reservationFilter,
       tables: tables ?? this.tables,
+      restaurantTables: restaurantTables ?? this.restaurantTables,
+      selectedTable: selectedTable ?? this.selectedTable,
       showSuccessMessage: showSuccessMessage ?? this.showSuccessMessage,
       showCancelMessage: showCancelMessage ?? this.showCancelMessage,
       showCompleteMessage: showCompleteMessage ?? this.showCompleteMessage,

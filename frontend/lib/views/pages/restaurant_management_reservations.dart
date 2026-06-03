@@ -9,6 +9,7 @@ import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_manage.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_management_service.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_management_tables.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import 'my_restaurants.dart';
@@ -250,26 +251,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
-        onTap: (index) {
-          if (index == 0) {
-            // déjà sur Réservations
-          }
-
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => RestaurantManagementServicesPageScreen(
-                  restaurant: reservations.selectedRestaurant!,
-                ),
-              ),
-            );
-          }
-
-          if (index == 2) {
-            // Navigator.push vers  page Tables
-          }
-        },
+        onTap: (_) {},
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.book),

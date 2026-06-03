@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -172,8 +174,9 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
                       ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
+                    onTap: ()  {
                       notifier.selectRestaurant(restaurant);
+                      if (context.mounted) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -183,6 +186,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
                           ),
                         );
                       }
+                    }
                   ),
                 ),
             ],

@@ -96,7 +96,9 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: 'Rafraîchir les données',
-              onPressed: () {},
+              onPressed: () {
+                notifier.refreshAssignTables();
+              },
             ),
           ],
           elevation: 2,
@@ -281,8 +283,10 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
                   child: ElevatedButton(
                     onPressed: enoughCapacity ? () async {
                       await notifier.assignTables(_temporarySelectedTableIds);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      }
                     } : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
