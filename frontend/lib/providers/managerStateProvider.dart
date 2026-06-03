@@ -20,10 +20,9 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   @override
   Future<ManagerState> build() async {
     try {
+      print("try");
       ref.watch(simulatedTimeProvider.notifier);
-      state = AsyncData(ManagerState());
-      state = AsyncLoading();
-      return await ManagerState.getMyRestaurants(ref.read(authProvider)!.id);
+      return await ManagerState.getMyRestaurants();
     } catch (e) {
       throw "Something went wrong!\nPlease try again later.";
     }
@@ -293,7 +292,7 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   Future<void> refreshMyResto() async {
     state = const AsyncLoading();
 
-    final data = await ManagerState.getMyRestaurants(ref.read(authProvider)!.id);
+    final data = await ManagerState.getMyRestaurants();
 
     state = AsyncData(data);
   }
