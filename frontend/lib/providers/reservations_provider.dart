@@ -21,4 +21,9 @@ class ReservationsNotifier extends AsyncNotifier<List<Reservation>> {
       state = AsyncValue.error('Impossible de charger les réservations.', StackTrace.current);
     }
   }
+
+  Future<void> cancelReservation(int reservationId) async {
+    await Reservation.cancelReservation(reservationId);
+    await loadReservations();
+  }
 }

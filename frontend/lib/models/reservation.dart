@@ -24,6 +24,30 @@ class Reservation {
     this.specialRequests,
   });
 
+  Reservation copyWith({
+    int? id,
+    String? restaurantName,
+    String? restaurantCity,
+    String? restaurantAddress,
+    String? restaurantPhone,
+    DateTime? datetime,
+    int? numberOfGuests,
+    String? status,
+    String? specialRequests,
+  }) {
+    return Reservation(
+      id: id ?? this.id,
+      restaurantName: restaurantName ?? this.restaurantName,
+      restaurantCity: restaurantCity ?? this.restaurantCity,
+      restaurantAddress: restaurantAddress ?? this.restaurantAddress,
+      restaurantPhone: restaurantPhone ?? this.restaurantPhone,
+      datetime: datetime ?? this.datetime,
+      numberOfGuests: numberOfGuests ?? this.numberOfGuests,
+      status: status ?? this.status,
+      specialRequests: specialRequests ?? this.specialRequests,
+    );
+  }
+
   factory Reservation.fromJson(Map<String, dynamic> json) {
     return Reservation(
       id: json['id'] as int,
@@ -50,6 +74,31 @@ class Reservation {
 
     throw Exception(
       'Failed to load reservations: ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<int> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'cancel_reservation',
+      anonymous: true,
+      body: jsonEncode({
+        '_reservation_id': reservationId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      if (body == null) {
+        throw Exception('Réservation introuvable.');
+      }
+
+      return body as int;
+    }
+
+    final body = jsonDecode(response.body);
+    throw Exception(
+      body['message'] ?? 'Impossible d’annuler la réservation.',
     );
   }
 }
