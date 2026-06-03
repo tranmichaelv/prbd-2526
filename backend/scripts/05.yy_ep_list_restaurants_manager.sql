@@ -24,7 +24,8 @@ $$
                    from reservations r3
                    where r3.restaurant = rest.id
                      and r3.status = 'pending'::status_type)
-                      as pending_requests_count
+                      as pending_requests_count,
+                   rest.slot_duration
 
            from restaurants rest
             join restaurant_managers rm on rest.id = rm.restaurant
