@@ -245,6 +245,109 @@ begin
 end;
 $$ language plpgsql;
 
+/*
+ Vérifie si un admin est connecté
+ */
+
+create or replace function auth.check_manager_logged()
+    returns void as
+$$
+begin
+    if not auth.is_manager() then
+        raise exception 'You must be logged with an admin role';
+    end if;
+end
+$$ language plpgsql;
+
+/*
+ Vérifie si l'utilisateur connecté est un admin
+ */
+
+create or replace function auth.is_manager()
+    returns bool as
+$$
+begin
+    return auth.role() is not null and auth.role() = 'manager';
+end
+$$ language plpgsql;
+create or replace function email_is_available(email text) returns boolean as
+    $$
+    begin
+        if email_is_available.email is null or trim(email_is_available.email) = '' then
+            return false;
+        end if;
+        if exists(
+            select 1
+            from users u
+            where trim(lower(u.email)) = trim(lower(email_is_available.email))
+        ) then
+            return false;
+        end if;
+        return true;
+    end;
+    $$ language plpgsql security definer ;
+
+grant execute on function email_is_available(text) to anon;
+
+create or replace function full_name_is_available(full_name text) returns boolean as
+$$
+begin
+    if full_name_is_available.full_name is null or trim(full_name_is_available.full_name) = '' then
+        return false;
+    end if;
+    if exists(
+        select 1
+        from users u
+        where trim(lower(u.full_name)) = trim(lower(full_name_is_available.full_name))
+    ) then
+        return false;
+    end if;
+    return true;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function full_name_is_available(text) to anon;
+
+create or replace function signup(email text, password text, full_name text, phone text default null) returns void as
+    $$
+        begin
+
+            if signup.email is null or trim(signup.email) = '' then
+                raise exception 'Email required';
+            end if;
+
+            if signup.email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' then
+                raise exception 'Email invalid';
+            end if;
+
+            if signup.password is null or signup.password !~ '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;.:!?/$%&@#]).{8,}$' then
+                raise exception 'Password invalid';
+            end if;
+
+            if signup.full_name is null or length(trim(signup.full_name)) < 5 then
+                raise exception 'Full name too short';
+            end if;
+
+            if not full_name_is_available(signup.full_name) then
+                raise exception 'Full name already exists';
+            end if;
+
+            if not email_is_available(signup.email) then
+                raise exception 'Email already exists';
+            end if;
+
+            insert into users(email, password, full_name, role, phone)
+            values (
+                    trim(lower(signup.email)),
+                    signup.password,
+                    trim(signup.full_name),
+                    'client',
+                    nullif(trim(signup.phone), '')
+
+            );
+        end;
+    $$ language plpgsql security definer ;
+grant execute on function signup(text,text,text,text) to anon;
 
 grant execute on function auth.login_anonymously_for_test() to anon;
 grant execute on function auth.login_for_test(text) to anon;
@@ -252,3 +355,6 @@ grant execute on function auth.logout_for_test() to anon;
 grant execute on function auth.id() to anon;
 grant execute on function auth.email() to anon;
 grant execute on function auth.role() to anon;
+grant execute on function auth.check_manager_logged() to anon;
+grant execute on function auth.is_manager() to anon;
+
