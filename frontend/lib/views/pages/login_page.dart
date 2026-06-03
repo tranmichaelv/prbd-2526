@@ -311,7 +311,9 @@ class _LoginState extends ConsumerState<LoginPage> {
       final user = ref.read(authProvider);
       if (!context.mounted) return;
 
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(
+        context,
+        user!.isManager ? '/manager' : '/home',);
     } catch (e) {
 
         if (!context.mounted) return;

@@ -16,6 +16,7 @@ class ConnectedUser {
     required this.name,
     required this.role,
 });
+  bool get isManager => role == 'manager';
 }
 
 final authProvider = NotifierProvider<AuthNotifier, ConnectedUser?>(
