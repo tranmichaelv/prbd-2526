@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_manage.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
@@ -39,10 +40,9 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
 
-    final stateSimulatedTime =  ref.watch(simulatedTimeProvider);
 
     final theme = Theme.of(context);
-    final simulatedTime = stateSimulatedTime.dateTime;
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     if (asyncState.value!.showSuccessMessage == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,7 +58,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
 
 
     return asyncState.when(
-        data: (state) => data(state, theme, notifier, simulatedTime!, context),
+        data: (state) => data(state, theme, notifier, referenceTime, context),
         error: (err, _) => error(err, StackTrace.current, context),
         loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
@@ -66,7 +66,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
       );
   }
 
-  Widget data(ManagerState reservations,  dynamic theme, ManagerStateNotifier notifier,DateTime simulatedTime, BuildContext context) {
+  Widget data(ManagerState reservations,  dynamic theme, ManagerStateNotifier notifier,DateTime referenceTime, BuildContext context) {
     final filteredReservations = reservations.reservationFilter == 'all' ?
         reservations.reservations : filterReservations(reservations.reservationFilter, reservations.reservations);
     return Scaffold(
@@ -106,7 +106,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
                   'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                   child: Text(
                     DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
+                        .format(referenceTime),
                     style: TextStyle(
                       fontSize: 10,
                       color: Colors.grey[400],
