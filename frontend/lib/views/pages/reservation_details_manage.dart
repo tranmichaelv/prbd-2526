@@ -326,12 +326,30 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
                         label: Text('Confirmer et assigner tables'),
                       ) :
                     ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: !canComplete(simulatedTime, reservation.selectedReservation!.datetime, reservation.selectedReservation!.status) ? null : () {
                         ConfirmReservationDialog().show(context);
                       },
                       icon: Icon(Icons.check_circle),
                       label: Text('Marquer comme terminée'),
                     ),
+                    if (reservation.selectedReservation!.status == "confirmed" &&
+                        !canComplete(
+                          simulatedTime,
+                          reservation.selectedReservation!.datetime,
+                          reservation.selectedReservation!.status,
+                        ))
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2.0),
+                        child: Center(
+                          child: Text(
+                            "Cette réservation ne peut pas encore être marquée comme terminée",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () {
@@ -393,5 +411,8 @@ Color getStatusColor(String status) {
     default :
       return Colors.grey;
   }
+}
 
+bool canComplete(DateTime simulatedTime, DateTime reservationDate, String status){
+  return status == "confirmed"  && !reservationDate.isAfter(simulatedTime);
 }
