@@ -6,13 +6,11 @@ create or replace function complete_reservation(_reservation_id int)
 
 $$
 begin
-    --     perform auth.check_manager_logged();
+        perform auth.check_manager_logged();
     update reservations set status = 'completed'::status_type where id = _reservation_id;
 end;
 $$ language plpgsql security definer ;
 
--- a mettre apres quand login ok
--- grant execute on function get_my_restaurants_test() to authenticated;
-grant execute on function  complete_reservation(_reservation_id int) to anon;
+grant execute on function  complete_reservation(_reservation_id int) to authenticated;
 
 

@@ -18,7 +18,7 @@ $$
 declare
     r1 reservations%ROWTYPE;
 begin
---     perform auth.check_manager_logged();
+    perform auth.check_manager_logged();
 select *
 into r1
 from reservations
@@ -40,15 +40,4 @@ end;
 
 $$ language plpgsql security definer ;
 
--- grant execute on function get_reservations_from_resto_manager(idResto integer) to authenticated;
-grant execute on function get_available_table_for_reservations(_reservation_id integer) to anon;
-
-
-
--- tests
--- select auth.login_for_test('boverhaegen@epfc.eu');
--- select get_available_table_for_reservations(21);
--- select current_user, auth.id(), auth.email(), auth.role();
--- select auth.check_manager_logged();
--- select auth.logout_for_test();
--- select * from users;
+grant execute on function get_available_table_for_reservations(_reservation_id integer) to authenticated;

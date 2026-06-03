@@ -5,7 +5,7 @@ create or replace function get_my_restaurants_test()
 
 $$
     begin
---         perform auth.check_manager_logged();
+        perform auth.check_manager_logged();
     return query
         select rest.id,
                   rest.name,
@@ -37,15 +37,6 @@ $$
     end;
 $$ language plpgsql security definer ;
 
--- a mettre apres quand login ok
--- grant execute on function get_my_restaurants_test() to authenticated;
-grant execute on function get_my_restaurants_test() to anon;
+grant execute on function get_my_restaurants_test() to authenticated;
 
 
--- tests
--- select auth.login_for_test('boverhaegen@epfc.eu');
--- select get_my_restaurants_test();
--- select current_user, auth.id(), auth.email(), auth.role();
--- select auth.check_manager_logged();
--- select auth.logout_for_test();
--- select * from users;

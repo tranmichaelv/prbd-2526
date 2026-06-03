@@ -6,15 +6,13 @@ create or replace function cancel_reservation(_reservation_id int)
 
 $$
 begin
---     perform auth.check_manager_logged();
+    perform auth.check_manager_logged();
     delete from reservation_tables where reservation = _reservation_id;
 
     update reservations set status = 'cancelled'::status_type where id = _reservation_id;
 end;
 $$ language plpgsql security definer ;
 
--- a mettre apres quand login ok
--- grant execute on function get_my_restaurants_test() to authenticated;
-grant execute on function  cancel_reservation(_reservation_id int) to anon;
+grant execute on function  cancel_reservation(_reservation_id int) to authenticated;
 
 

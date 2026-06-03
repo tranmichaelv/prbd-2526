@@ -31,7 +31,7 @@ create or replace function get_reservations_from_resto_manager(_restaurant_id in
     returns setof reservation_info_manager as
 $$
 begin
---     perform auth.check_manager_logged();
+    perform auth.check_manager_logged();
     return query
     select
         res.id,
@@ -60,8 +60,7 @@ begin
     from reservations res
         join restaurants resto on resto.id = res.restaurant
         join users u on u.id = res.client
---         join reservation_tables rt on res.id = rt.reservation
---         join tables t on t.id = rt."table"
+
 
     where resto.id = _restaurant_id
     order by res.datetime desc, res.id;
@@ -69,14 +68,5 @@ end;
 
 $$ language plpgsql security definer ;
 
--- grant execute on function get_reservations_from_resto_manager(idResto integer) to authenticated;
-grant execute on function get_reservations_from_resto_manager(_restaurant_id integer) to anon;
+grant execute on function get_reservations_from_resto_manager(_restaurant_id integer) to authenticated;
 
-
--- tests
--- select auth.login_for_test('boverhaegen@epfc.eu');
--- select get_reservations_from_resto_manager(2);
--- select current_user, auth.id(), auth.email(), auth.role();
--- select auth.check_manager_logged();
--- select auth.logout_for_test();
--- select * from users;
