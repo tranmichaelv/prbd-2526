@@ -15,7 +15,8 @@ create type restaurant_search_info as
         rating double precision,
         price_range integer,
         last_reservation_at timestamp,
-        pending_requests_count integer
+        pending_requests_count integer,
+        slot_duration integer
     );
 
 
@@ -43,7 +44,8 @@ select
         where r3.restaurant = rest.id
           and r3.client = 6
           and r3.status = 'pending'::status_type)
-     as pending_requests_count
+     as pending_requests_count,
+    rest.slot_duration
 
 from restaurants rest
 

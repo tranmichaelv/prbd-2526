@@ -15,6 +15,7 @@ class RestaurantSearchResult {
   final int? priceRange;
   final DateTime? lastReservationAt;
   final int pendingRequestsCount;
+  final int slotDuration;
 
   const RestaurantSearchResult({
     required this.id,
@@ -27,6 +28,7 @@ class RestaurantSearchResult {
     required this.priceRange,
     required this.lastReservationAt,
     required this.pendingRequestsCount,
+    this.slotDuration = 30,
   });
 
   factory RestaurantSearchResult.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class RestaurantSearchResult {
           ? null
           : DateTime.parse(json['last_reservation_at'] as String),
       pendingRequestsCount: json['pending_requests_count'] as int? ?? 0,
+      slotDuration: json['slot_duration'] as int? ?? 30,
     );
   }
 

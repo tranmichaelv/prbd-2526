@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:prbd_2526_c03/core/services/api_client.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
+import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
 
 class ManagerState {
@@ -15,8 +16,13 @@ class ManagerState {
   final String reservationFilter;
 
   final List<TablesExtended> tables;
+  final List<Tables> restaurantTables;
+  final Tables? selectedTable;
+
   final bool showSuccessMessage;
-  final bool showCancellMessage;
+  final bool showCancelMessage;
+  final bool showCompleteMessage;
+
 
   const ManagerState({
     this.restaurants = const [],
@@ -25,8 +31,11 @@ class ManagerState {
     this.selectedReservation,
     this.reservationFilter = 'all',
     this.tables = const [],
+    this.restaurantTables = const [],
+    this.selectedTable,
     this.showSuccessMessage = false,
-    this.showCancellMessage = false,
+    this.showCancelMessage = false,
+    this.showCompleteMessage = false,
   });
 
   ManagerState copyWith({
@@ -36,8 +45,11 @@ class ManagerState {
     ReservationsManager? selectedReservation,
     String? reservationFilter,
     List<TablesExtended>? tables,
+    List<Tables>? restaurantTables,
+    Tables? selectedTable,
     bool? showSuccessMessage,
-    bool? showCancellMessage,
+    bool? showCancelMessage,
+    bool? showCompleteMessage,
   }) {
     return ManagerState(
       restaurants: restaurants ?? this.restaurants,
@@ -48,8 +60,11 @@ class ManagerState {
       selectedReservation ?? this.selectedReservation,
       reservationFilter: reservationFilter ?? this.reservationFilter,
       tables: tables ?? this.tables,
+      restaurantTables: restaurantTables ?? this.restaurantTables,
+      selectedTable: selectedTable ?? this.selectedTable,
       showSuccessMessage: showSuccessMessage ?? this.showSuccessMessage,
-      showCancellMessage: showCancellMessage ?? this.showCancellMessage,
+      showCancelMessage: showCancelMessage ?? this.showCancelMessage,
+      showCompleteMessage: showCompleteMessage ?? this.showCompleteMessage,
     );
   }
 
@@ -115,6 +130,20 @@ class ManagerState {
   static Future<void> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
       'cancel_reservation',
+      body: json.encode({'_reservation_id': reservationId,}),
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+
+    throw Exception(
+      'Failed to load reservations: ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> completeReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'complete_reservation',
       body: json.encode({'_reservation_id': reservationId,}),
     );
     if (response.statusCode == 200 || response.statusCode == 204) {

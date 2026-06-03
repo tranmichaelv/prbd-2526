@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 
 void main() async {
@@ -31,21 +36,11 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
 
-    // final selectedRestaurantNotifier = ref.read(selectedRestaurantProvider.notifier);
-
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-
-    // return asyncState.when(
-    //   data: (state) => data(context, state, notifier, selectedRestaurantNotifier, theme, simulatedTime, ref),
-    //   error: (err, _) => error(err, StackTrace.current, notifier),
-    //   loading: () => const Scaffold(
-    //     body: Center(child: CircularProgressIndicator()),
-    //   ),
-    // );
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return asyncState.when(
-      data: (state) => data(context, state, notifier, theme, simulatedTime, ref),
+      data: (state) => data(context, state, notifier, theme, referenceTime, ref),
       error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -53,7 +48,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
     );
   }
 
-    Widget data(BuildContext context, ManagerState restaurants, ManagerStateNotifier notifier, dynamic theme, DateTime simulatedTime, WidgetRef ref) {
+    Widget data(BuildContext context, ManagerState restaurants, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Mes restaurants'),
@@ -81,16 +76,21 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
-                child: Tooltip(
-                  message:
-                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                  child: Text(
-                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    SimuledTime().show(context);
+                  },
+                  child: Tooltip(
+                    message:
+                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(referenceTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -174,8 +174,9 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
                       ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
+                    onTap: ()  {
                       notifier.selectRestaurant(restaurant);
+                      if (context.mounted) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -185,6 +186,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
                           ),
                         );
                       }
+                    }
                   ),
                 ),
             ],

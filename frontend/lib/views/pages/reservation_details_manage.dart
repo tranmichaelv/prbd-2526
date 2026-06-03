@@ -5,8 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/assign_table.dart';
 import 'package:prbd_2526_c03/views/widgets/cancel_reservation_dialog.dart';
+import 'package:prbd_2526_c03/views/widgets/confirm_reservation_dialog.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import 'my_restaurants.dart';
 
@@ -39,22 +43,26 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
     final notifier = ref.read(managerStateProvider.notifier);
 
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
-    if (asyncState.value!.showCancellMessage == true) {
+    if (asyncState.value!.showCancelMessage == true || asyncState.value!.showCompleteMessage == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Réservation annulée avec succès'),
+            content: asyncState.value!.showCancelMessage == true ?
+              Text('Réservation annulée avec succès') :
+              Text('Réservation marquée comme terminée')  ,
             backgroundColor: Colors.black,
           ),
         );
-        notifier.clearCancelMessage();
+        asyncState.value!.showCancelMessage == true ?
+          notifier.clearCancelMessage() :
+          notifier.clearCompleteMessage();
       });
     }
 
     return asyncState.when(
-      data: (state) => data(context, state, notifier, theme, simulatedTime),
+      data: (state) => data(context, state, notifier, theme, referenceTime),
       error: (err, _) => error(err, StackTrace.current, notifier, context),
       loading: () =>
       const Scaffold(
@@ -63,7 +71,7 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
     );
   }
 
-  Widget data(BuildContext context, ManagerState reservation, ManagerStateNotifier notifier, dynamic theme, DateTime simulatedTime) {
+  Widget data(BuildContext context, ManagerState reservation, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime) {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -93,16 +101,21 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
-                child: Tooltip(
-                  message:
-                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                  child: Text(
-                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    SimuledTime().show(context);
+                  },
+                  child: Tooltip(
+                    message:
+                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(referenceTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -312,12 +325,30 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
                         label: Text('Confirmer et assigner tables'),
                       ) :
                     ElevatedButton.icon(
-                      onPressed: () {
-
+                      onPressed: !canComplete(referenceTime, reservation.selectedReservation!.datetime, reservation.selectedReservation!.status) ? null : () {
+                        ConfirmReservationDialog().show(context);
                       },
                       icon: Icon(Icons.check_circle),
                       label: Text('Marquer comme terminée'),
                     ),
+                    if (reservation.selectedReservation!.status == "confirmed" &&
+                        !canComplete(
+                          referenceTime,
+                          reservation.selectedReservation!.datetime,
+                          reservation.selectedReservation!.status,
+                        ))
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2.0),
+                        child: Center(
+                          child: Text(
+                            "Cette réservation ne peut pas encore être marquée comme terminée",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () {
@@ -379,5 +410,8 @@ Color getStatusColor(String status) {
     default :
       return Colors.grey;
   }
+}
 
+bool canComplete(DateTime simulatedTime, DateTime reservationDate, String status){
+  return status == "confirmed"  && !reservationDate.isAfter(simulatedTime);
 }

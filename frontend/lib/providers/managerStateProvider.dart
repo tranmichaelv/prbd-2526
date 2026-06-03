@@ -6,6 +6,7 @@ import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 
 
 
@@ -18,6 +19,7 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   @override
   Future<ManagerState> build() async {
     try {
+      ref.watch(simulatedTimeProvider.notifier);
       state = AsyncData(ManagerState());
       state = AsyncLoading();
       return await ManagerState.getMyRestaurants();
@@ -54,10 +56,13 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
 
     try {
       final reservations = await ReservationsManager.getReservationsFromRestaurant(restaurant.id);
+      final tables = await Tables.getAllTablesFromRestaurant(restaurant.id);
+
       state = AsyncData(
         current.copyWith(
           selectedRestaurant: restaurant,
           reservations: reservations,
+          restaurantTables: tables
         ),
       );
     } catch (e) {
@@ -65,8 +70,48 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,
       );
+      print(e);
     }
+  }
 
+  Future<void> saveTable(int capacity, int numerTable) async {
+    final current = state.value!;
+    state = const AsyncLoading();
+
+    try {
+      await Tables.saveTable(capacity, numerTable, state.value!.selectedTable!.id);
+
+      state = AsyncData(
+        current.copyWith(
+
+        ),
+      );
+    } catch (e) {
+      state = AsyncValue.error(
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
+      );
+      print(e);
+    }
+  }
+
+  Future<void> selectTable(Tables table) async {
+    final current = state.value!;
+    state = const AsyncLoading();
+
+    try {
+      state = AsyncData(
+        current.copyWith(
+          selectedTable: table,
+        ),
+      );
+    } catch (e) {
+      state = AsyncValue.error(
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
+      );
+      print(e);
+    }
   }
 
   Future<void> selectReservations(ReservationsManager reservation) async {
@@ -110,6 +155,23 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
       throw "Something went wrong!\nPlease try again later.";
     }
   }
+  //
+  // Future<void> getAllTablesFromRestaurant() async {
+  //   final current = state.value;
+  //   if (current == null) return;
+  //   state = const AsyncLoading();
+  //
+  //   try {
+  //     final tables = await TablesExtended.getAllTablesFromRestaurant(current.selectedRestaurant!.id);
+  //     state = AsyncData(
+  //       current.copyWith(
+  //         restaurantTables: tables,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     throw "Something went wrong!\nPlease try again later.";
+  //   }
+  // }
 
   bool isTableChosen(TablesExtended table) {
     return state.asData?.value.selectedReservation!.tables!.any((t) => t.id == table.id) ?? false;
@@ -199,7 +261,18 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
 
     state = AsyncData(
       current.copyWith(
-        showCancellMessage: false,
+        showCancelMessage: false,
+      ),
+    );
+  }
+
+  void clearCompleteMessage() {
+    final current = state.value;
+    if (current == null) return;
+
+    state = AsyncData(
+      current.copyWith(
+        showCompleteMessage: false,
       ),
     );
   }
@@ -210,6 +283,19 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
     final data = await ManagerState.getMyRestaurants();
 
     state = AsyncData(data);
+  }
+
+  Future<void> refreshAssignTables() async {
+    state = const AsyncLoading();
+
+    final current = state.value;
+    final tables = await TablesExtended.getTablesExtendedAvailable(current!.selectedReservation!.id);
+
+    state = AsyncData(
+      current.copyWith(
+        tables: tables,
+      ),
+    );
   }
 
   Future<void> refreshSelectedReservations() async {
@@ -226,12 +312,34 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   }
 
   Future<void> cancelReservation() async {
+    await updateReservationStatus(
+      status: "cancelled",
+      api: ManagerState.cancelReservation,
+      tables: []
+    );
+  }
+
+  Future<void> completeReservation() async {
+    await updateReservationStatus(
+      status: "completed",
+      api: ManagerState.completeReservation,
+      tables: state.value!.selectedReservation!.tables
+    );
+  }
+
+
+  Future<void> updateReservationStatus({
+    required String status,
+    required Future<void> Function(int reservationId) api,
+    required List<Tables>? tables
+  }) async {
 
     final current = state.value;
 
+    state = const AsyncLoading();
 
     try {
-      await ManagerState.cancelReservation(
+      await api(
         current!.selectedReservation!.id,
       );
 
@@ -244,17 +352,17 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         restaurantName: current.selectedReservation!.restaurantName,
         datetime: current.selectedReservation!.datetime,
         numberOfGuests: current.selectedReservation!.numberOfGuests,
-        status: "cancelled",
+        status: status,
         specialRequests: current.selectedReservation!.specialRequests,
-        tables: [],
+        tables: tables,
       );
 
-      final updatedReservations = current.reservations.map((r) {
-        return r.id == current.selectedReservation!.id ? updatedReservation : r;
-      }).toList();
+      final updatedReservations = current.reservations
+          .map((r) => r.id == updatedReservation.id ? updatedReservation : r)
+          .toList();
 
       final updatedRestaurants = current.restaurants.map((r) {
-        if (r.id == current.selectedRestaurant!.id) {
+        if (r.id == current.selectedRestaurant?.id) {
           return RestaurantSearchResult(
             id: r.id,
             name: r.name,
@@ -265,36 +373,31 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
             rating: r.rating,
             priceRange: r.priceRange,
             lastReservationAt: r.lastReservationAt,
-            pendingRequestsCount: r.pendingRequestsCount - 1,
+            pendingRequestsCount: (r.pendingRequestsCount - 1).clamp(0, 999999),
           );
         }
         return r;
       }).toList();
+
+      final isCompleted = status == "completed";
+      final isCancelled = status == "cancelled";
+
 
       state = AsyncData(
         current.copyWith(
           reservations: updatedReservations,
           selectedReservation: updatedReservation,
           restaurants: updatedRestaurants,
-          showCancellMessage: true,
+          showCompleteMessage: isCompleted,
+          showCancelMessage: isCancelled
         ),
       );
 
-    // } catch (e) {
-    //   state = AsyncValue.error(
-    //     "Something went wrong!\nPlease try again later.",
-    //     StackTrace.current,
-    //   );
-    // }
-    } catch (e, stackTrace) { // 👈 On récupère l'erreur (e) et la ligne du code (stackTrace)
-      // 🎯 1. Ceci va s'afficher en GROS et en rouge dans ton terminal de debug (VS Code / Android Studio)
-      print('❌ ERREUR DANS cancelReservation: $e');
-      print('📋 DÉTAILS DE L\'ERREUR:\n$stackTrace');
-
-      // 🎯 2. On passe la VRAIE erreur au state pour que ton écran l'affiche
+      print(state.value!.selectedReservation!.status);
+    } catch (_) {
       state = AsyncValue.error(
-        e.toString(), // 👈 Remplace le texte générique par le vrai message
-        stackTrace,
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
       );
     }
   }

@@ -6,21 +6,25 @@ import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
-import 'package:prbd_2526_c03/views/widgets/table_selection_list.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import 'my_restaurants.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: MyRestaurantsPageScreen(),
       ),
-      home: const MyRestaurantsPageScreen(),
     ),
   );
 }
@@ -65,10 +69,10 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
     final notifier = ref.read(managerStateProvider.notifier);
 
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return asyncState.when(
-      data: (state) => data(context, state, notifier, theme, simulatedTime),
+      data: (state) => data(context, state, notifier, theme, referenceTime),
       error: (err, _) => error(err, StackTrace.current, notifier, context),
       loading: () =>
       const Scaffold(
@@ -77,7 +81,7 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
     );
   }
 
-    Widget data(BuildContext context, ManagerState state, ManagerStateNotifier notifier, dynamic theme, DateTime simulatedTime) {
+    Widget data(BuildContext context, ManagerState state, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime) {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -92,7 +96,9 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: 'Rafraîchir les données',
-              onPressed: () {},
+              onPressed: () {
+                notifier.refreshAssignTables();
+              },
             ),
           ],
           elevation: 2,
@@ -104,16 +110,21 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
-                child: Tooltip(
-                  message:
-                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                  child: Text(
-                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    SimuledTime().show(context);
+                  },
+                  child: Tooltip(
+                    message:
+                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(referenceTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -272,8 +283,10 @@ class _AssignTablesState extends ConsumerState<AssignTablesPageScreen> {
                   child: ElevatedButton(
                     onPressed: enoughCapacity ? () async {
                       await notifier.assignTables(_temporarySelectedTableIds);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      }
                     } : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
