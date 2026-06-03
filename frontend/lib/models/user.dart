@@ -65,7 +65,8 @@ class User {
   }
 
   static String? validateConfirmPassword(String? value, String? password) {
-    String? passwordError = validatePassword(value);
+    final passwordError = validatePassword(value);
+
     if (passwordError == null) {
       return passwordError;
     }
@@ -82,7 +83,7 @@ class User {
       return 'Email requis';
 
     final format = RegExp(r'^[A-Za-z0-9._%+-]+@epfc\.eu$');
-    if (!format.hasMatch(email!)) {
+    if (!format.hasMatch(email)) {
       return 'Veuillez entrer une adresse email valide';
     }
 

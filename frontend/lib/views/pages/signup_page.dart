@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/core/tools/validating_text_editing_controller.dart';
 import 'package:prbd_2526_c03/models/user.dart';
 import 'package:prbd_2526_c03/services/security.dart';
 import 'package:prbd_2526_c03/views/pages/login_page.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
+
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -18,27 +20,77 @@ void main() async {
     ),
   );
 }
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
   @override
   State<SignupPage> createState() => SignupState();
 }
+
 class SignupState extends State<SignupPage> {
+  late ValidatingTextEditingController nameController;
+  late ValidatingTextEditingController emailController;
+  late ValidatingTextEditingController passwordController;
+  late ValidatingTextEditingController confirmPasswordController;
 
-  String? errEmail;
-  String? errFullName;
-  String? errPassword;
-  String? errConfirmPassword;
-
-  final _formKey = GlobalKey<FormState>();
-
-  final passwordFocus = FocusNode();
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
   final phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    nameController = ValidatingTextEditingController(
+      validator: User.validateFullName,
+      asyncValidator: User.validateFullNameUnicity,
+    );
+    nameController.onAfterValidated = () => setState(() {});
+
+    emailController = ValidatingTextEditingController(
+      validator: User.validateEmail,
+      asyncValidator: User.validateEmailUnicity,
+    );
+    emailController.onAfterValidated = () => setState(() {});
+
+    passwordController = ValidatingTextEditingController(
+      validator: User.validatePassword,
+    );
+    passwordController.onAfterValidated = () {
+      confirmPasswordController.validate();
+      setState(() {});
+    };
+
+    confirmPasswordController = ValidatingTextEditingController(
+      validator: (value) {
+        return User.validateConfirmPassword(
+          value,
+          passwordController.text,
+        );
+      },
+    );
+    confirmPasswordController.onAfterValidated = () => setState(() {});
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    phoneController.dispose();
+
+    super.dispose();
+  }
+
+  void _clearForm() {
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    phoneController.clear();
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +111,7 @@ class SignupState extends State<SignupPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: _clearForm,
           ),
         ],
         elevation: 2,
@@ -92,7 +144,6 @@ class SignupState extends State<SignupPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
-            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -108,76 +159,62 @@ class SignupState extends State<SignupPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
+
                 TextFormField(
                   controller: nameController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  onChanged: (_) {
-                      if (errFullName != null) {
-                        setState(() {
-                          errFullName = null;
-                        });
-                      }
-                  },
-                  validator: (value) => User.validateFullName(value) ?? errFullName,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Nom complet',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.person),
+                    errorText: nameController.errorText,
                   ),
                 ),
+
                 const SizedBox(height: 16),
+
                 TextFormField(
                   controller: emailController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  onChanged: (_) {
-                    if (errEmail != null) {
-                      setState(() {
-                        errEmail = null;
-                      });
-                    }
-                  },
-                  validator: (value) => User.validateEmail(value) ?? errEmail,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email),
+                    errorText: emailController.errorText,
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
+
                 const SizedBox(height: 16),
+
                 TextFormField(
                   controller: passwordController,
-                  focusNode: passwordFocus,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (value) => User.validatePassword(value) ?? errPassword,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Mot de passe',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    errorText: passwordController.errorText,
                   ),
                   obscureText: true,
                 ),
+
                 const SizedBox(height: 16),
+
                 TextFormField(
                   controller: confirmPasswordController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  onChanged: (_) {
-                    if (errConfirmPassword != null) {
-                      setState(() {
-                        errConfirmPassword = null;
-                      });
-                    }
-                  },
-                  validator: (value) => User.validateConfirmPassword(value,passwordController.text),
                   decoration: InputDecoration(
                     labelText: 'Confirmer le mot de passe',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                    errorText: errConfirmPassword,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    errorText: confirmPasswordController.errorText,
                   ),
                   obscureText: true,
                 ),
+
                 const SizedBox(height: 16),
+
                 TextFormField(
                   controller: phoneController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -188,23 +225,25 @@ class SignupState extends State<SignupPage> {
                   ),
                   keyboardType: TextInputType.phone,
                 ),
+
                 const SizedBox(height: 24),
+
                 ElevatedButton(
-                  onPressed: () {
-                    _submitForm();
-                  },
+                  onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: const Text('S\'inscrire'),
                 ),
+
                 const SizedBox(height: 16),
+
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
+                        builder: (context) => const LoginPage(),
                       ),
                     );
                   },
@@ -218,39 +257,8 @@ class SignupState extends State<SignupPage> {
     );
   }
 
-  @override
-  void dispose() {
-    passwordFocus.dispose();
-
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    phoneController.dispose();
-
-    super.dispose();
-  }
-  @override
-  void initState() {
-    super.initState();
-
-    passwordFocus.addListener(() {
-      if (passwordFocus.hasFocus) {
-        setState(() {
-          errConfirmPassword = 'Veuillez confirmez votre mot de passe';
-        });
-      }
-    });
-  }
   Future<void> _submitForm() async {
-
-    setState(() {
-      errEmail = null;
-      errFullName = null;
-      errPassword = null;
-      errConfirmPassword = null;
-    });
-    if (!_formKey.currentState!.validate()) {
+    if (!await _validateForm()) {
       return;
     }
 
@@ -259,48 +267,52 @@ class SignupState extends State<SignupPage> {
     final password = passwordController.text;
     final phone = phoneController.text.trim();
 
-
     try {
-      final fullNameError = await User.validateFullNameUnicity(fullName);
-
-      if (fullNameError != null) {
-        setState(() {
-          errFullName = fullNameError;
-        });
-
-        _formKey.currentState!.validate();
-        return;
-      }
-
-      final emailError = await User.validateEmailUnicity(email);
-      if (emailError != null) {
-        setState(() {
-          errEmail = emailError;
-        });
-
-        _formKey.currentState!.validate();
-        return;
-      }
-
       await Security.signup(
-          email: email,
-          password: password,
-          fullName: fullName,
-          phone: phone.isEmpty ? null : phone,
+        email: email,
+        password: password,
+        fullName: fullName,
+        phone: phone.isEmpty ? null : phone,
       );
-
-      if (!context.mounted) return;
-
-    } catch (e) {
-
-      // print('erreur signup: $e');
 
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de l inscription')),
+        const SnackBar(
+          content: Text('Compte créé avec succès'),
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de l inscription'),
+        ),
       );
     }
   }
 
+  Future<bool> _validateForm() async {
+    await nameController.validateAndWait();
+    await emailController.validateAndWait();
+    await passwordController.validateAndWait();
+    await confirmPasswordController.validateAndWait();
+
+    return _isFormValid;
+  }
+
+  bool get _isFormValid {
+    return nameController.isValid == true &&
+        emailController.isValid == true &&
+        passwordController.isValid == true &&
+        confirmPasswordController.isValid == true;
+  }
 }
