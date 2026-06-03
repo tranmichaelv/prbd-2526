@@ -81,9 +81,21 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
     try {
       await Tables.saveTable(capacity, numerTable, state.value!.selectedTable!.id);
 
+      final updatedTable = Tables(
+        id: current.selectedTable!.id,
+        restaurant: current.selectedTable!.restaurant,
+        tableNumber: numerTable,
+        capacity: capacity,
+      );
+
+      final updatedTables = current.restaurantTables.map((t) {
+        return t.id == updatedTable.id ? updatedTable : t;
+      }).toList();
+
       state = AsyncData(
         current.copyWith(
-
+          restaurantTables: updatedTables,
+          selectedTable: updatedTable,
         ),
       );
     } catch (e) {
