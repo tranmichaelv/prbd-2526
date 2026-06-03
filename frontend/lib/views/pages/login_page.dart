@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/services/api_client.dart';
 import 'package:prbd_2526_c03/services/params.dart';
 import 'package:prbd_2526_c03/services/security.dart';
-import 'package:prbd_2526_c03/signup_page.dart';
+import 'package:prbd_2526_c03/views/pages/signup_page.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -23,13 +24,13 @@ void main() async {
   );
 }
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
   @override
-  State<LoginPage> createState() => _LoginState();
+  ConsumerState<LoginPage> createState() => _LoginState();
 }
 
-class _LoginState extends State<LoginPage> {
+class _LoginState extends ConsumerState<LoginPage> {
 
   String? loginError;
   final TextEditingController emailController = TextEditingController();
@@ -305,14 +306,17 @@ class _LoginState extends State<LoginPage> {
   void login(BuildContext context, String mail, String password) async {
 
     try {
-      final token = await Security.login(mail, password);
-      await Params.setValue('token', token);
+      await ref.read(authProvider.notifier).login(mail,password);
 
+      final user = ref.read(authProvider);
+      print('USER CONNECTÉ ID: ${user?.id}');
+      print('USER CONNECTÉ EMAIL: ${user?.email}');
+      print('USER CONNECTÉ ROLE: ${user?.role}');
       if (!context.mounted) return;
 
-      //Navigator.pushReplacementNamed(context, '/home');
-      print('Tentative login avec : $mail');
-      print('Token recu: $token');
+      Navigator.pushReplacementNamed(context, '/home');
+      // print('Tentative login avec : $mail');
+      // print('Token recu: $token');
     } catch (e) {
       print('Erreur login: $e');
 

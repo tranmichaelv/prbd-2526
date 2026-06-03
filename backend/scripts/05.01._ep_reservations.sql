@@ -21,15 +21,15 @@ $$
     select r.id, rest.name, rest.city, rest.address, rest.phone, r.datetime, r.number_of_guests, r.status, r.special_requests
         from reservations r
         join restaurants rest on rest.id = r.restaurant
-     --   where auth.role() = 'client'
-     --   and r.client = auth.id()
-    where r.client = 6
+     -- where auth.role() = 'client'
+            where r.client = auth.id()
+    -- where r.client = 6
         order by r.datetime desc
 
 
 $$;
 
-grant execute on function get_reservations() to anon, authenticated;
+grant execute on function get_reservations() to client, authenticated;
 
 create or replace function add_reservation(_restaurant_id int, _datetime timestamp, _number_of_guests int, _special_requests text) returns void
     as
@@ -37,12 +37,11 @@ create or replace function add_reservation(_restaurant_id int, _datetime timesta
     declare
         _client int;
         begin
-            -- _client := auth.id();
+            _client := auth.id();
             -- pour tester
-            _client = 6;
+            -- _client = 6;
             insert into reservations(client,restaurant, datetime, number_of_guests,status, special_requests)
             values (_client,_restaurant_id,_datetime,_number_of_guests,'pending',_special_requests);
         end;
     $$ language plpgsql security definer ;
--- anon juste pour tester
-grant execute on function add_reservation(int,timestamp,int,text) to anon, authenticated;
+grant execute on function add_reservation(int,timestamp,int,text) to client, authenticated;

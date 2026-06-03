@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/login_page.dart';
+import 'package:prbd_2526_c03/views/pages/login_page.dart';
 import 'package:prbd_2526_c03/model/user.dart';
 import 'package:prbd_2526_c03/services/security.dart';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prbd_2526_c03/views/pages/home_client_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:prbd_2526_c03/views/pages/login_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -21,11 +22,15 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('fr', 'FR'),
 
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomeClientPageScreen(),
+      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const HomeClientPageScreen(),
+      home: const LoginPage(),
     );
   }
 }

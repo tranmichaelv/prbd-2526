@@ -3,7 +3,7 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/core/services/api_client.dart';
+import 'package:prbd_2526_c03/services/api_client.dart';
 
 class AvailableSlot {
 

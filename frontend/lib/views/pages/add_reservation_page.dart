@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservation.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/providers/available_slots_provider.dart';
+import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 
 class ReservationAddPage extends ConsumerStatefulWidget {
   final RestaurantSearchResult restaurant;
@@ -360,10 +361,14 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                         numberOfGuests: numberOfGuests,
                         specialRequests: null,
                       );
-
+                      await ref.read(reservationsProvider.notifier).loadReservations();
                       if (!context.mounted) return;
 
-                      Navigator.pop(context);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/home',
+                          (route) => false,
+                      );
                     } catch (e) {
                       if (!context.mounted) return;
 

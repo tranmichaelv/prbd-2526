@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/core/services/api_client.dart';
+import 'package:prbd_2526_c03/services/api_client.dart';
 
 class Reservation {
   final int id;
@@ -42,6 +42,8 @@ class Reservation {
   static Future<List<Reservation>> getReservations() async {
     final response = await ApiClient.get('get_reservations');
 
+    // print('GET RESERVATIONS STATUS: ${response.statusCode}');
+    // print('GET RESERVATIONS BODY: ${response.body}');
     if (response.statusCode == 200) {
       final List<dynamic> body = jsonDecode(response.body);
       return body
@@ -70,8 +72,8 @@ class Reservation {
         }),
       );
 
-      print('ADD RESERVATION STATUS: ${response.statusCode}');
-      print('ADD RESERVATION BODY: ${response.body}');
+      // print('ADD RESERVATION STATUS: ${response.statusCode}');
+      // print('ADD RESERVATION BODY: ${response.body}');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Failed to add reservation: ${response.statusCode} ${response.body}');
