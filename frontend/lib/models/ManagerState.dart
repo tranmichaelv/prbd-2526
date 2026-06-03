@@ -91,7 +91,6 @@ class ManagerState {
   static Future<List<ReservationsManager>> getReservationsFromRestaurant(int restaurantId) async {
     final response = await ApiClient.post(
       'get_reservations_from_resto_manager',
-      anonymous: true,
       body: json.encode({'_restaurant_id': restaurantId,
       }),
     );
@@ -111,7 +110,6 @@ class ManagerState {
   static Future<void> chooseTable(int reservationId, List<int> tableIds) async {
     final response = await ApiClient.post(
       'link_table_to_reservation',
-      anonymous: true,
       body: json.encode({
         '_reservation_id': reservationId,
         '_table_ids': tableIds,

@@ -135,7 +135,6 @@ class Reservation {
   static Future<int> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
       'cancel_reservation',
-      anonymous: false,
       body: jsonEncode({
         '_reservation_id': reservationId,
       }),

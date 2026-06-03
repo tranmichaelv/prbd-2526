@@ -27,7 +27,6 @@ class Tables {
   static Future<List<Tables>> getAllTablesFromRestaurant(int restaurantId) async {
     final response = await ApiClient.post(
       'get_available_table_for_restaurant',
-      anonymous: true,
       body: json.encode({'_restaurant_id': restaurantId,
       }),
     );
@@ -47,7 +46,6 @@ class Tables {
   static Future<void> saveTable(int capacity, int numberTable, int tableId) async {
     final response = await ApiClient.post(
       'save_table',
-      anonymous: true,
       body: json.encode({
         '_number_table': numberTable,
         '_capacity':capacity,

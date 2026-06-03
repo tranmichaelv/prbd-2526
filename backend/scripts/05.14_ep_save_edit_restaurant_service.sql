@@ -1,3 +1,4 @@
+set search_path to public, auth;
 create  or replace function  save_restaurant_service(
     _service_id integer,
     _restaurant_id integer,

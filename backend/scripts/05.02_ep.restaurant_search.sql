@@ -61,7 +61,7 @@ order by rest.name
 limit greatest(1, least(result_limit, 50));
 $$;
 
-grant execute on function search_restaurants(text, integer) to anon, authenticated;
+grant execute on function search_restaurants(text, integer) to authenticated;
 
 
 -- select * from search_restaurants('sushi', 6);

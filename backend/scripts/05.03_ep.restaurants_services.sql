@@ -12,4 +12,4 @@ $$
 $$;
 
 
-grant execute on function get_restaurants_services(integer) to anon, authenticated;
+grant execute on function get_restaurants_services(integer) to authenticated;

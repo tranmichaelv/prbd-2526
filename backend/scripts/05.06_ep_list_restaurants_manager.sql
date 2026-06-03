@@ -29,8 +29,7 @@ $$
 
            from restaurants rest
             join restaurant_managers rm on rest.id = rm.restaurant
---            where rm.manager = auth.id()
-        where rm.manager = 2
+           where rm.manager = auth.id()
            order by last_reservation_at desc nulls last,
                     pending_requests_count desc,
                     rest.name;

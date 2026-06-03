@@ -47,7 +47,6 @@ class ReservationsManager {
   static Future<List<ReservationsManager>> getReservationsFromRestaurant(int restaurantId) async {
     final response = await ApiClient.post(
         'get_reservations_from_resto_manager',
-        anonymous: true,
         body: json.encode({'_restaurant_id': restaurantId,
         }),
     );

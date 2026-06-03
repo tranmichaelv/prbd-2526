@@ -1,4 +1,4 @@
-set search_path to public;
+set search_path to public,auth;
 
 drop function if exists cancel_reservation(integer);
 
@@ -22,4 +22,4 @@ $$
     end;
 $$;
 
-grant execute on function cancel_reservation(integer) to anon, authenticated;
+grant execute on function cancel_reservation(integer) to authenticated;

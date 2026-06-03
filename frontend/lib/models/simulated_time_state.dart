@@ -39,7 +39,6 @@ class SimulatedTimeState {
   static Future<void> saveSimulatedTime(DateTime newDateTime) async {
     final response = await ApiClient.post(
         'save_simulated_time',
-        anonymous: true,
         body: json.encode({
           '_datetime': newDateTime.toString(),
         })

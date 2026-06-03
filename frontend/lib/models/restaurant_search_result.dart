@@ -56,7 +56,6 @@ class RestaurantSearchResult {
 
     final response = await ApiClient.post(
       'search_restaurants',
-      anonymous: true, // pas de login encore
       body: json.encode({
         'search_text': trimmedQuery == null || trimmedQuery.isEmpty
             ? null

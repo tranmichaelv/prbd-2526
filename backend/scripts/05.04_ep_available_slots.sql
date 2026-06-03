@@ -1,4 +1,4 @@
-set search_path to public;
+set search_path to public,auth;
 
 create or replace function get_available_slots(
     _restaurant_id integer,
@@ -24,7 +24,7 @@ where s.restaurant = _restaurant_id
 order by slot_datetime;
 $$;;
 
-grant execute on function get_available_slots(integer, date) to anon, authenticated;
+grant execute on function get_available_slots(integer, date) to authenticated;
 
 
 

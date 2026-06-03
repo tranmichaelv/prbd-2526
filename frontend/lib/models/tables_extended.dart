@@ -30,7 +30,6 @@ class TablesExtended {
   static Future<List<TablesExtended>> getTablesExtendedAvailable(int reservationId) async {
     final response = await ApiClient.post(
       'get_available_table_for_reservations',
-      anonymous: true,
       body: json.encode({'_reservation_id': reservationId,
       }),
     );

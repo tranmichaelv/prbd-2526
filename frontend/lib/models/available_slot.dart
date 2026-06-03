@@ -25,7 +25,6 @@ class AvailableSlot {
   }) async {
     final response = await ApiClient.post(
       'get_available_slots',
-      anonymous: true,
       body: jsonEncode({
         '_restaurant_id': restaurantId,
         '_date': DateFormat('yyyy-MM-dd').format(date),

@@ -1,4 +1,4 @@
-set search_path to public;
+set search_path to public, auth;
 
 drop type if exists reservation_info cascade;
 
@@ -30,7 +30,7 @@ $$
 
 $$;
 
-grant execute on function get_reservations() to client, authenticated;
+grant execute on function get_reservations() to  authenticated;
 
 create or replace function add_reservation(_restaurant_id int, _datetime timestamp, _number_of_guests int, _special_requests text) returns void
     as
@@ -45,7 +45,7 @@ create or replace function add_reservation(_restaurant_id int, _datetime timesta
             values (_client,_restaurant_id,_datetime,_number_of_guests,'pending',_special_requests);
         end;
     $$ language plpgsql security definer ;
-grant execute on function add_reservation(int,timestamp,int,text) to client, authenticated;
+grant execute on function add_reservation(int,timestamp,int,text) to  authenticated;
 
 
 create or replace function update_reservation(_reservation_id int,_datetime timestamp,_number_of_guests int, _special_requests text) returns void as
@@ -65,4 +65,4 @@ create or replace function update_reservation(_reservation_id int,_datetime time
 
     $$ language plpgsql security definer ;
 
-grant execute on function  update_reservation(int,timestamp,int,text) to client, authenticated;
+grant execute on function  update_reservation(int,timestamp,int,text) to  authenticated;

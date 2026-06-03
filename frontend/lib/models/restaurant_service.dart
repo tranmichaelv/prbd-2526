@@ -26,7 +26,6 @@ class RestaurantService {
   static Future<List<RestaurantService>> getByRestaurantService (int restaurantId) async {
     final response = await ApiClient.post(
       'get_restaurants_services',
-      anonymous: true,
       body: json.encode({'_restaurant_id' : restaurantId,
       }),
     );
@@ -47,7 +46,6 @@ class RestaurantService {
 }) async {
     final response = await ApiClient.post(
       'save_restaurant_service',
-      anonymous: true,
       body: jsonEncode({
         '_service_id': serviceId,
         '_restaurant_id': restaurantId,
@@ -67,7 +65,6 @@ class RestaurantService {
 }) async {
     final response = await ApiClient.post(
         'delete_restaurant_service',
-        anonymous: true,
       body: jsonEncode({
         '_service_id' : serviceId,
         '_restaurant_id' : restaurantId,
