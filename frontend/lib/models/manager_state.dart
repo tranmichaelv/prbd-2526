@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:prbd_2526_c03/core/services/api_client.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
+import 'package:prbd_2526_c03/services/api_client.dart';
 
 class ManagerState {
   final List<RestaurantSearchResult> restaurants;

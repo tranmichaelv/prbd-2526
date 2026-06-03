@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/models/manager_state.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
-import 'package:prbd_2526_c03/models/tables_extended.dart';
 import 'package:prbd_2526_c03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/edit_table.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_management_service.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import '../../models/tables.dart';
@@ -168,41 +167,52 @@ class RestaurantManagementTablesPageScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 2,
-        onTap: (selectedIndex) {
-          switch (selectedIndex) {
-            case 0:
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: 2,
+          onTap: (selectedIndex) {
+
+            if (selectedIndex == 0) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => RestaurantManagementReservationsPageScreen(),
                 ),
               );
-            case 1:
-              print(selectedIndex);
-            case 2:
-              {}
-            default:
-              throw UnimplementedError('no widget for $selectedIndex');
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Réservations',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.table_restaurant),
-            label: 'Tables',
-          ),
-        ],
-      ),
+              return;
+            }
+
+            if (selectedIndex == 1) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RestaurantManagementServicesPageScreen(
+                    restaurant: restaurant,
+                  ),
+                ),
+              );
+              return;
+            }
+
+            if (selectedIndex == 2) {
+              return;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Réservations',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.schedule),
+              label: 'Services',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.table_restaurant),
+              label: 'Tables',
+            ),
+          ],
+        ),
     );
   }
 }

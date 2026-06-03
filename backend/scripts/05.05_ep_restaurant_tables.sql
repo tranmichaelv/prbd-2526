@@ -13,6 +13,7 @@ $$
 begin
     perform auth.check_manager_logged();
 
+    return query
     select t.*
     from tables t
     where t.restaurant = _restaurant_id;

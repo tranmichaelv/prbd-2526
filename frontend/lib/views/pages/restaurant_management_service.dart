@@ -6,6 +6,8 @@ import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/restaurant_service.dart';
 import 'package:prbd_2526_c03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_c03/providers/restaurant_services_provider.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
+import 'package:prbd_2526_c03/views/pages/restaurant_management_tables.dart';
 
 import 'edit_service_page.dart';
 
@@ -160,15 +162,25 @@ class RestaurantManagementServicesPageScreen extends ConsumerStatefulWidget {
         currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => RestaurantManagementReservationsPageScreen(),
+                ),
+            );
           }
 
           if (index == 1) {
-            // déjà sur Services
+            return;
           }
 
           if (index == 2) {
-            // Navigator.push vers  page Tables
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const RestaurantManagementTablesPageScreen(),
+                ),
+            );
           }
         },
         items: const [
