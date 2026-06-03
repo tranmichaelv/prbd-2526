@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prbd_2526_c03/models/ManagerState.dart';
+import 'package:prbd_2526_c03/models/manager_state.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
-import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 
 
@@ -21,9 +20,8 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   Future<ManagerState> build() async {
     try {
       ref.watch(simulatedTimeProvider.notifier);
-      state = AsyncData(ManagerState());
-      state = AsyncLoading();
-      return await ManagerState.getMyRestaurants(ref.read(authProvider)!.id);
+
+      return await ManagerState.getMyRestaurants();
     } catch (e) {
       throw "Something went wrong!\nPlease try again later.";
     }
@@ -293,10 +291,17 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   Future<void> refreshMyResto() async {
     state = const AsyncLoading();
 
-    final data = await ManagerState.getMyRestaurants(ref.read(authProvider)!.id);
-
-    state = AsyncData(data);
+    try {
+      final data = await ManagerState.getMyRestaurants();
+      state = AsyncData(data);
+    } catch (e) {
+      state = AsyncValue.error(
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
+      );
+    }
   }
+
 
   Future<void> refreshAssignTables() async {
     state = const AsyncLoading();

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/restaurant_service.dart';
-import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_c03/providers/restaurant_services_provider.dart';
 
 import 'edit_service_page.dart';

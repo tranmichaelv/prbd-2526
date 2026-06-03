@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/services/api_client.dart';
 import 'package:prbd_2526_c03/services/params.dart';
-import 'package:prbd_2526_c03/services/security.dart';
 import 'package:prbd_2526_c03/views/pages/signup_page.dart';
-import 'package:prbd_2526_c03/providers/auth_provider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);

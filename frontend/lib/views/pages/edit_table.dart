@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_c03/models/ManagerState.dart';
+import 'package:prbd_2526_c03/models/manager_state.dart';
 import 'package:prbd_2526_c03/models/tables.dart';
-import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/my_restaurants.dart';
 

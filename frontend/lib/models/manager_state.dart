@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:prbd_2526_c03/core/services/api_client.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
@@ -68,34 +67,29 @@ class ManagerState {
     );
   }
 
-  static Future<ManagerState> getMyRestaurants(int userId) async {
-    // Simuler un delai
-    try {
-      await Future.delayed(throttleDuration);
+  static Future<ManagerState> getMyRestaurants() async {
+    await Future.delayed(throttleDuration);
 
-      final response = await ApiClient.post(
-        'get_my_restaurants_test',
-        anonymous: true,
-        body: json.encode({'_user_id': userId,
-        }),
+    final response = await ApiClient.get('get_my_restaurants_test');
+
+    print('STATUS get_my_restaurants_test: ${response.statusCode}');
+    print('BODY get_my_restaurants_test: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+
+      final restaurants = body
+          .map((dynamic item) => RestaurantSearchResult.fromJson(item))
+          .toList();
+
+      return ManagerState(
+        restaurants: restaurants,
       );
-
-
-      if (response.statusCode == 200) {
-        final List<dynamic> body = json.decode(response.body);
-        final restaurants = body
-            .map((dynamic item) => RestaurantSearchResult.fromJson(item))
-            .toList();
-        return ManagerState(
-          restaurants: restaurants,
-        );
-      } else {
-        throw Exception('Failed to get favorites pairs');
-      }
-    }catch (e) {
-      print(e);
     }
-    return ManagerState();
+
+    throw Exception(
+      'Failed to get restaurants: ${response.statusCode} ${response.body}',
+    );
   }
 
   static Future<List<ReservationsManager>> getReservationsFromRestaurant(int restaurantId) async {

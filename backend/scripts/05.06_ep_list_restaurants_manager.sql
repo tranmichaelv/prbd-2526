@@ -36,6 +36,5 @@ $$
     end;
 $$ language plpgsql security definer ;
 
-grant execute on function get_my_restaurants_test() to authenticated;
-
+grant execute on function get_my_restaurants_test() to authenticated,manager;
 
