@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 
 class SimuledTime extends ConsumerStatefulWidget  {
@@ -21,7 +22,7 @@ class _SimuledTimeState extends ConsumerState<SimuledTime> {
   @override
   void initState() {
     super.initState();
-    _temporarySimulatedTime = ref.read(simulatedTimeProvider).dateTime ?? DateTime.now();
+    _temporarySimulatedTime = ref.read(referenceTimeProvider);
   }
 
   @override
