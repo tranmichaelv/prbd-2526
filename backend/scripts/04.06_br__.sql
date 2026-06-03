@@ -15,6 +15,7 @@ begin
           and rt."table" = rt1."table"
           and r.id > r1.id
           and r.status in ('confirmed'::status_type, 'completed'::status_type)
+          and r1.status in ('confirmed'::status_type, 'completed'::status_type)
     ) then
        raise exception 'Table already reserved for this service and date';
     end if;

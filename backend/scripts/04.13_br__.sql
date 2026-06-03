@@ -13,6 +13,7 @@ begin
           and r.datetime::date = r1.datetime::date
           and get_service(r.datetime) = get_service(r1.datetime)
           and r.status in ('confirmed'::status_type, 'completed'::status_type, 'pending'::status_type)
+          and r1.status in ('confirmed'::status_type, 'completed'::status_type, 'pending'::status_type)
     ) then
         raise exception 'Client can''t have two times the same reservations';
     end if;

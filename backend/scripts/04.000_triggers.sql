@@ -70,3 +70,20 @@ create trigger trg_prevent_restaurant_or_client_change_from_reservations
     on reservations
     for each row
 execute function prevent_restaurant_or_client_change();
+
+create or replace function prevent_update()
+    returns trigger as $$
+begin
+    raise exception 'Modification interdite de reservation_tables';
+end;
+$$ language plpgsql;
+
+create trigger tg_prevent_update_reservation_tables
+    before update on reservation_tables
+    for each row
+execute function prevent_update();
+
+create trigger tg_prevent_update_restaurant_managers
+    before update on restaurant_managers
+    for each row
+execute function prevent_update();

@@ -15,6 +15,7 @@ class RestaurantSearchResult {
   final int? priceRange;
   final DateTime? lastReservationAt;
   final int pendingRequestsCount;
+  final int slotDuration;
 
   const RestaurantSearchResult({
     required this.id,
@@ -27,6 +28,7 @@ class RestaurantSearchResult {
     required this.priceRange,
     required this.lastReservationAt,
     required this.pendingRequestsCount,
+    this.slotDuration = 30,
   });
 
   factory RestaurantSearchResult.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class RestaurantSearchResult {
           ? null
           : DateTime.parse(json['last_reservation_at'] as String),
       pendingRequestsCount: json['pending_requests_count'] as int? ?? 0,
+      slotDuration: json['slot_duration'] as int? ?? 30,
     );
   }
 
@@ -73,6 +76,23 @@ class RestaurantSearchResult {
       .toList();
     } else {
       throw Exception('Failed to search restaurants: ${response.statusCode} ${response.body}',);
+    }
+  }
+
+  static Future<List<RestaurantSearchResult>> getMyRestaurants() async {
+    // Simuler un delai
+    await Future.delayed(throttleDuration);
+
+    final response =
+    await ApiClient.get('get_my_restaurants_test');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body
+          .map((dynamic item) => RestaurantSearchResult.fromJson(item))
+          .toList();
+    } else {
+      throw Exception('Failed to get favorites pairs');
     }
   }
 }
