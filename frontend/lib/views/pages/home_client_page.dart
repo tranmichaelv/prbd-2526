@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
 import 'package:prbd_2526_c03/views/pages/search_restaurants_page.dart';
-import '../../core/services/api_client.dart';
+import '../../services/api_client.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 
 
 class HomeClientPageScreen extends ConsumerStatefulWidget{
@@ -47,7 +49,19 @@ class _HomeClientPageScreenState extends ConsumerState<HomeClientPageScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion',
-            onPressed: () {},
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+
+              ref.invalidate(reservationsProvider);
+
+              if (!context.mounted) return;
+
+              Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false
+              );
+            },
           ),
         ],
         elevation: 2,
