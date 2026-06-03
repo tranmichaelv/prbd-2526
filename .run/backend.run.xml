@@ -23,11 +23,12 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/05.02_ep.restaurant_search.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.03_ep.restaurants_services.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_assign_table.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_cancel_reservations.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_restaurants_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_complete_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_confirm_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_reservations_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_restaurants_manager.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_tables_manager.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_list_cancel_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.yy_ep_simulated_time.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-c03&quot;" />
     <method v="2" />

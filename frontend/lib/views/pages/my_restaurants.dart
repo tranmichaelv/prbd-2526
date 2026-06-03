@@ -4,7 +4,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_management_reservations.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 
 void main() async {
@@ -31,21 +33,15 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
 
-    // final selectedRestaurantNotifier = ref.read(selectedRestaurantProvider.notifier);
+    final stateSimulatedTime =  ref.watch(simulatedTimeProvider);
+
 
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final simulatedTime = stateSimulatedTime.dateTime;
 
-    // return asyncState.when(
-    //   data: (state) => data(context, state, notifier, selectedRestaurantNotifier, theme, simulatedTime, ref),
-    //   error: (err, _) => error(err, StackTrace.current, notifier),
-    //   loading: () => const Scaffold(
-    //     body: Center(child: CircularProgressIndicator()),
-    //   ),
-    // );
 
     return asyncState.when(
-      data: (state) => data(context, state, notifier, theme, simulatedTime, ref),
+      data: (state) => data(context, state, notifier, theme, simulatedTime!, ref),
       error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -81,16 +77,21 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
-                child: Tooltip(
-                  message:
-                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                  child: Text(
-                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    SimuledTime().show(context);
+                  },
+                  child: Tooltip(
+                    message:
+                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(simulatedTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),

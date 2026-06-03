@@ -5,20 +5,24 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_manage.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import 'my_restaurants.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: MyRestaurantsPageScreen(),
       ),
-      home: MyRestaurantsPageScreen()
     ),
   );
 }
@@ -35,8 +39,10 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
 
+    final stateSimulatedTime =  ref.watch(simulatedTimeProvider);
+
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final simulatedTime = stateSimulatedTime.dateTime;
 
     if (asyncState.value!.showSuccessMessage == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -52,7 +58,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
 
 
     return asyncState.when(
-        data: (state) => data(state, theme, notifier, simulatedTime, context),
+        data: (state) => data(state, theme, notifier, simulatedTime!, context),
         error: (err, _) => error(err, StackTrace.current, context),
         loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
@@ -91,16 +97,21 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(simulatedTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

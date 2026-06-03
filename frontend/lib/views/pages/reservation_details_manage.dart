@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/ManagerState.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/providers/managerStateProvider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/assign_table.dart';
 import 'package:prbd_2526_c03/views/widgets/cancel_reservation_dialog.dart';
+import 'package:prbd_2526_c03/views/widgets/confirm_reservation_dialog.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 import 'my_restaurants.dart';
 
@@ -38,23 +41,29 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
 
-    final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final stateSimulatedTime =  ref.watch(simulatedTimeProvider);
 
-    if (asyncState.value!.showCancellMessage == true) {
+    final theme = Theme.of(context);
+    final simulatedTime = stateSimulatedTime.dateTime;
+
+    if (asyncState.value!.showCancelMessage == true || asyncState.value!.showCompleteMessage == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Réservation annulée avec succès'),
+            content: asyncState.value!.showCancelMessage == true ?
+              Text('Réservation annulée avec succès') :
+              Text('Réservation marquée comme terminée')  ,
             backgroundColor: Colors.black,
           ),
         );
-        notifier.clearCancelMessage();
+        asyncState.value!.showCancelMessage == true ?
+          notifier.clearCancelMessage() :
+          notifier.clearCompleteMessage();
       });
     }
 
     return asyncState.when(
-      data: (state) => data(context, state, notifier, theme, simulatedTime),
+      data: (state) => data(context, state, notifier, theme, simulatedTime!),
       error: (err, _) => error(err, StackTrace.current, notifier, context),
       loading: () =>
       const Scaffold(
@@ -93,16 +102,21 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
-                child: Tooltip(
-                  message:
-                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                  child: Text(
-                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                        .format(simulatedTime),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    SimuledTime().show(context);
+                  },
+                  child: Tooltip(
+                    message:
+                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(simulatedTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -313,7 +327,7 @@ class ReservationDetailsManagePageScreen extends ConsumerWidget {
                       ) :
                     ElevatedButton.icon(
                       onPressed: () {
-
+                        ConfirmReservationDialog().show(context);
                       },
                       icon: Icon(Icons.check_circle),
                       label: Text('Marquer comme terminée'),

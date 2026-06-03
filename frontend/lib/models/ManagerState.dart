@@ -16,7 +16,9 @@ class ManagerState {
 
   final List<TablesExtended> tables;
   final bool showSuccessMessage;
-  final bool showCancellMessage;
+  final bool showCancelMessage;
+  final bool showCompleteMessage;
+
 
   const ManagerState({
     this.restaurants = const [],
@@ -26,7 +28,8 @@ class ManagerState {
     this.reservationFilter = 'all',
     this.tables = const [],
     this.showSuccessMessage = false,
-    this.showCancellMessage = false,
+    this.showCancelMessage = false,
+    this.showCompleteMessage = false,
   });
 
   ManagerState copyWith({
@@ -37,7 +40,8 @@ class ManagerState {
     String? reservationFilter,
     List<TablesExtended>? tables,
     bool? showSuccessMessage,
-    bool? showCancellMessage,
+    bool? showCancelMessage,
+    bool? showCompleteMessage,
   }) {
     return ManagerState(
       restaurants: restaurants ?? this.restaurants,
@@ -49,7 +53,8 @@ class ManagerState {
       reservationFilter: reservationFilter ?? this.reservationFilter,
       tables: tables ?? this.tables,
       showSuccessMessage: showSuccessMessage ?? this.showSuccessMessage,
-      showCancellMessage: showCancellMessage ?? this.showCancellMessage,
+      showCancelMessage: showCancelMessage ?? this.showCancelMessage,
+      showCompleteMessage: showCompleteMessage ?? this.showCompleteMessage,
     );
   }
 
@@ -115,6 +120,20 @@ class ManagerState {
   static Future<void> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
       'cancel_reservation',
+      body: json.encode({'_reservation_id': reservationId,}),
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+
+    throw Exception(
+      'Failed to load reservations: ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> completeReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'complete_reservation',
       body: json.encode({'_reservation_id': reservationId,}),
     );
     if (response.statusCode == 200 || response.statusCode == 204) {
