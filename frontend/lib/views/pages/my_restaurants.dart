@@ -36,7 +36,7 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncState = ref.watch(managerStateProvider);
     final notifier = ref.read(managerStateProvider.notifier);
-  print("first");
+
     final theme = Theme.of(context);
     final referenceTime =  ref.watch(referenceTimeProvider);
 

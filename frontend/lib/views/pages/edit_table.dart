@@ -64,7 +64,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
     );
   }
 
-  Widget data(BuildContext context, Tables table, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
+  Widget data(BuildContext context, Tables selectedTable, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -79,8 +79,11 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
           IconButton(
             tooltip: 'Enregistrer',
             onPressed: _isValid ?
-                () {
-
+                () async {
+              await notifier.saveTable(_temporarySelectedTableCapacity, _temporarySelectedTableNumber);
+              if(context.mounted) {
+                Navigator.pop(context);
+              }
             } : null,
             icon: const Icon(Icons.save),
           ),
@@ -128,7 +131,10 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (val) => setState(() {
+                    _temporarySelectedTableNumber =
+                        int.tryParse(val) ?? _temporarySelectedTableNumber;
+                  }),
                   initialValue: '$_temporarySelectedTableNumber',
                   decoration: const InputDecoration(
                     labelText: 'Numéro de table',
@@ -148,7 +154,10 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
                     }
 
                     for (final table in _allTables) {
-                      if (table.tableNumber == tableNumber && tableNumber != _temporarySelectedTableNumber) {
+                      if (table.tableNumber == tableNumber && tableNumber != selectedTable.tableNumber) {
+                        print(tableNumber);
+                        print(selectedTable.id);
+
                         return 'Ce numéro de table est déjà utilisé pour ce restaurant.';
                       }
                     }

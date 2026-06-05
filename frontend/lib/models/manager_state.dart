@@ -72,9 +72,6 @@ class ManagerState {
 
     final response = await ApiClient.get('get_my_restaurants_test');
 
-    print('STATUS get_my_restaurants_test: ${response.statusCode}');
-    print('BODY get_my_restaurants_test: ${response.body}');
-
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
 

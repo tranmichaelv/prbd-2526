@@ -69,7 +69,6 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,
       );
-      print(e);
     }
   }
 
@@ -102,7 +101,6 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,
       );
-      print(e);
     }
   }
 
@@ -121,7 +119,6 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,
       );
-      print(e);
     }
   }
 
@@ -411,7 +408,6 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
         ),
       );
 
-      print(state.value!.selectedReservation!.status);
     } catch (_) {
       state = AsyncValue.error(
         "Something went wrong!\nPlease try again later.",
