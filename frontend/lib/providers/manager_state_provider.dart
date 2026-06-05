@@ -6,6 +6,7 @@ import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/models/tables_extended.dart';
+import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 
 
@@ -20,6 +21,22 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
   Future<ManagerState> build() async {
     try {
       ref.watch(simulatedTimeProvider.notifier);
+      final user = ref.watch(authProvider);
+      if(user != null){
+        print(user.name);
+      }
+      if (user == null) {
+        return  ManagerState(
+          restaurants: [],
+          selectedReservation: null,
+          reservations: [],
+          reservationFilter: '',
+          tables: [],
+          restaurantTables: [],
+          selectedTable: null,
+          selectedRestaurant: null,
+        );
+      }
 
       return await ManagerState.getMyRestaurants();
     } catch (e) {
@@ -55,13 +72,31 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
 
     try {
       final reservations = await ReservationsManager.getReservationsFromRestaurant(restaurant.id);
-      final tables = await Tables.getAllTablesFromRestaurant(restaurant.id);
 
       state = AsyncData(
         current.copyWith(
           selectedRestaurant: restaurant,
           reservations: reservations,
-          restaurantTables: tables
+        ),
+      );
+    } catch (e) {
+      state = AsyncValue.error(
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
+      );
+    }
+  }
+
+  Future<void> getTablesForRestaurant(RestaurantSearchResult restaurant) async {
+    final current = state.value!;
+    state = const AsyncLoading();
+
+    try {
+      final tables = await Tables.getAllTablesFromRestaurant(restaurant.id);
+
+      state = AsyncData(
+        current.copyWith(
+            restaurantTables: tables
         ),
       );
     } catch (e) {
@@ -89,6 +124,12 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
       final updatedTables = current.restaurantTables.map((t) {
         return t.id == updatedTable.id ? updatedTable : t;
       }).toList();
+
+      updatedTables.sort(
+          (a,b) {
+            return  a.tableNumber.compareTo(b.tableNumber);
+            },
+      );
 
       state = AsyncData(
         current.copyWith(
