@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/restaurant_service.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
-class EditServicePageScreen extends StatefulWidget {
+class EditServicePageScreen extends ConsumerStatefulWidget  {
   final RestaurantSearchResult restaurant;
   final RestaurantService? service;
   final List<RestaurantService> services;
@@ -20,11 +22,11 @@ class EditServicePageScreen extends StatefulWidget {
   });
 
   @override
-  State<EditServicePageScreen> createState() => _EditServicePageScreenState();
+  ConsumerState<EditServicePageScreen> createState() => _EditServicePageScreenState();
 
   }
 
-class _EditServicePageScreenState extends State<EditServicePageScreen> {
+class _EditServicePageScreenState extends ConsumerState<EditServicePageScreen> {
   late String? selectedDay;
   late int? startHour;
   late int? startMinute;
@@ -229,8 +231,8 @@ class _EditServicePageScreenState extends State<EditServicePageScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-    // final referenceTime =  ref.watch(referenceTimeProvider);
+    // final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final referenceTime =  ref.watch(referenceTimeProvider);
     final errorMessage = _validationError();
     final canSave = _isFormComplete() && errorMessage == null;
 
@@ -260,44 +262,26 @@ class _EditServicePageScreenState extends State<EditServicePageScreen> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          // child: SafeArea(
-          //   child: Padding(
-          //     padding: const EdgeInsets.only(top: 2.0),
-          //     child: GestureDetector(
-          //       onTap: () {
-          //         SimuledTime().show(context);
-          //       },
-          //       child: Tooltip(
-          //         message:
-          //         'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-          //         child: Text(
-          //           DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-          //               .format(referenceTime),
-          //           style: TextStyle(
-          //             fontSize: 10,
-          //             color: Colors.grey[400],
-          //             fontWeight: FontWeight.normal,
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ),
       ),
       body: SafeArea(

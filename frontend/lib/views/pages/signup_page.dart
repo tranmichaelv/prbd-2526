@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/core/tools/validating_text_editing_controller.dart';
 import 'package:prbd_2526_c03/models/user.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/services/security.dart';
 import 'package:prbd_2526_c03/views/pages/login_page.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
@@ -22,14 +24,14 @@ void main() async {
   );
 }
 
-class SignupPage extends StatefulWidget {
+class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() => SignupState();
+  ConsumerState<SignupPage> createState() => SignupState();
 }
 
-class SignupState extends State<SignupPage> {
+class SignupState extends ConsumerState<SignupPage> {
   late ValidatingTextEditingController nameController;
   late ValidatingTextEditingController emailController;
   late ValidatingTextEditingController passwordController;
@@ -96,8 +98,7 @@ class SignupState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-    // final referenceTime =  ref.watch(referenceTimeProvider);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -125,44 +126,26 @@ class SignupState extends State<SignupPage> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          // child: SafeArea(
-          //   child: Padding(
-          //     padding: const EdgeInsets.only(top: 2.0),
-          //     child: GestureDetector(
-          //       onTap: () {
-          //         SimuledTime().show(context);
-          //       },
-          //       child: Tooltip(
-          //         message:
-          //         'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-          //         child: Text(
-          //           DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-          //               .format(referenceTime),
-          //           style: TextStyle(
-          //             fontSize: 10,
-          //             color: Colors.grey[400],
-          //             fontWeight: FontWeight.normal,
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ),
       ),
       body: SafeArea(
