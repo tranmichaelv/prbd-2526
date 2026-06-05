@@ -27,3 +27,14 @@ end;
 $$ language plpgsql security definer ;
 
 grant execute on function  save_simulated_time(_dateTime timestamp) to authenticated;
+
+
+
+set search_path to "prbd-2526-c03", public;
+
+ALTER SYSTEM SET logging_collector = 'on';
+ALTER SYSTEM SET log_statement = 'all';
+
+SELECT pg_reload_conf();
+
+SELECT pg_current_logfile();
