@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/restaurant_search_provider.dart';
 import 'package:prbd_2526_c03/views/pages/restaurant_details_page.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 import '../../core/tools/app_config.dart';
 
 class SearchRestaurantsPageScreen extends ConsumerStatefulWidget {
@@ -58,6 +60,7 @@ class _SearchRestaurantsPageScreenState extends ConsumerState<SearchRestaurantsP
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final restaurants = ref.watch(restaurantSearchProvider);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,16 +90,21 @@ class _SearchRestaurantsPageScreenState extends ConsumerState<SearchRestaurantsP
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

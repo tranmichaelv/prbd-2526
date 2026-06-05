@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservations_manager.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/models/restaurant_service.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 class EditServicePageScreen extends StatefulWidget {
   final RestaurantSearchResult restaurant;
@@ -229,6 +230,7 @@ class _EditServicePageScreenState extends State<EditServicePageScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    // final referenceTime =  ref.watch(referenceTimeProvider);
     final errorMessage = _validationError();
     final canSave = _isFormComplete() && errorMessage == null;
 
@@ -273,6 +275,29 @@ class _EditServicePageScreenState extends State<EditServicePageScreen> {
               ),
             ),
           ),
+          // child: SafeArea(
+          //   child: Padding(
+          //     padding: const EdgeInsets.only(top: 2.0),
+          //     child: GestureDetector(
+          //       onTap: () {
+          //         SimuledTime().show(context);
+          //       },
+          //       child: Tooltip(
+          //         message:
+          //         'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+          //         child: Text(
+          //           DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+          //               .format(referenceTime),
+          //           style: TextStyle(
+          //             fontSize: 10,
+          //             color: Colors.grey[400],
+          //             fontWeight: FontWeight.normal,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ),
       ),
       body: SafeArea(
