@@ -27,7 +27,7 @@ class _SimuledTimeState extends ConsumerState<SimuledTime> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(simulatedTimeProvider);
+    final state = ref.watch(referenceTimeProvider);
 
     return AlertDialog(
       title: const Text('Modifier le temps simulé'),
@@ -51,14 +51,14 @@ class _SimuledTimeState extends ConsumerState<SimuledTime> {
                 lastDate: DateTime(2100),
               );
 
-              final time = state.dateTime;
+              final time = state;
               if (date == null) return;
 
               final newDatetime = DateTime(
                 date.year,
                 date.month,
                 date.day,
-                time!.hour,
+                time.hour,
                 time.minute,
               );
 
@@ -86,11 +86,11 @@ class _SimuledTimeState extends ConsumerState<SimuledTime> {
                   ),
                 );
 
-                final date = state.dateTime;
+                final date = state;
                 if (time == null) return;
 
                 final newDatetime = DateTime(
-                  date!.year,
+                  date.year,
                   date.month,
                   date.day,
                   time.hour,
@@ -114,7 +114,8 @@ class _SimuledTimeState extends ConsumerState<SimuledTime> {
         ),
         TextButton(
             onPressed: () => {
-
+              ref.read(simulatedTimeProvider.notifier).nullTime(),
+              Navigator.pop(context),
             },
             child: Text(
               "Effacer(null)",

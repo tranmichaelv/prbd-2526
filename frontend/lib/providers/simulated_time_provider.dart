@@ -12,6 +12,7 @@ class SimulatedTimeNotifier extends Notifier<SimulatedTimeState> {
   @override
   SimulatedTimeState build() {
     try {
+      getSimulatedTime();
       return SimulatedTimeState();
     } catch (e) {
       throw "Something went wrong!\nPlease try again later.";
@@ -19,7 +20,6 @@ class SimulatedTimeNotifier extends Notifier<SimulatedTimeState> {
   }
 
   Future<void> getSimulatedTime() async {
-    state = state.copyWith(isLoading: true);
     try {
       final current = await SimulatedTimeState.getSimulatedTime();
 
@@ -46,6 +46,25 @@ class SimulatedTimeNotifier extends Notifier<SimulatedTimeState> {
       );
 
       await SimulatedTimeState.saveSimulatedTime(state.dateTime!);
+
+    } catch (e) {
+      state = state.copyWith(
+        error: "Something went wrong!\nPlease try again later.",
+        isLoading: false,
+      );
+    }
+  }
+
+  Future<void> nullTime() async {
+    state = state.copyWith(isLoading: true);
+    try {
+
+      state = state.copyWith(
+        isLoading: false,
+        dateTime: null,
+      );
+
+      await SimulatedTimeState.nullSimulatedTime();
 
     } catch (e) {
       state = state.copyWith(

@@ -39,6 +39,8 @@ class MyRestaurantsPageScreen extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final referenceTime =  ref.watch(referenceTimeProvider);
+    // print(ref.read(referenceTimeProvider).toString());
+    // print(ref.read(simulatedTimeProvider).dateTime);
 
     return asyncState.when(
       data: (state) => data(context, state, notifier, theme, referenceTime, ref),

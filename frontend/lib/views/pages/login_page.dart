@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/providers/auth_provider.dart';
 import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/services/api_client.dart';
 import 'package:prbd_2526_c03/services/params.dart';
 import 'package:prbd_2526_c03/views/pages/signup_page.dart';
@@ -39,6 +40,14 @@ class _LoginState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+
+    ref.read(simulatedTimeProvider.notifier).getSimulatedTime();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final referenceTime =  ref.watch(referenceTimeProvider);
@@ -51,7 +60,9 @@ class _LoginState extends ConsumerState<LoginPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: () {
+              ref.read(simulatedTimeProvider.notifier).getSimulatedTime();
+            },
           ),
         ],
         elevation: 2,
