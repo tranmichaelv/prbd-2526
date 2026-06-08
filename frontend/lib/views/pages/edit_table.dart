@@ -24,7 +24,11 @@ void main() async {
 }
 
 class EditTablePageScreen extends ConsumerStatefulWidget {
-  const EditTablePageScreen({super.key});
+  final bool isAdd;
+  const EditTablePageScreen({
+    super.key,
+    this.isAdd = false,
+  });
 
   @override
   ConsumerState<EditTablePageScreen> createState() => _EditTablePageScreen();
@@ -39,11 +43,22 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   @override
   void initState() {
     super.initState();
-    final selectedTable = ref.read(managerStateProvider).value!.selectedTable!;
 
-    _temporarySelectedTableNumber = selectedTable.tableNumber;
-    _temporarySelectedTableCapacity = selectedTable.capacity;
-    _allTables = ref.read(managerStateProvider).value!.restaurantTables;
+    final managerState = ref.read(managerStateProvider).value!;
+    _allTables = managerState.restaurantTables;
+
+    if(widget.isAdd) {
+      _temporarySelectedTableNumber = _allTables.isEmpty ? 1 : _allTables.map((t) => t.tableNumber).reduce((a, b) => a > b ? a : b) + 1;
+
+      _temporarySelectedTableCapacity = 1;
+    } else {
+      final selectedTable = ref.read(managerStateProvider).value!.selectedTable!;
+
+      _temporarySelectedTableNumber = selectedTable.tableNumber;
+      _temporarySelectedTableCapacity = selectedTable.capacity;
+    }
+
+   // _allTables = ref.read(managerStateProvider).value!.restaurantTables;
   }
 
   @override
@@ -56,7 +71,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
 
     return asyncState.when(
       data: (state) =>
-          data(context, state.selectedTable!, notifier, theme, referenceTime, ref),
+          data(context, widget.isAdd ? null : state.selectedTable!, notifier, theme, referenceTime, ref),
       error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () =>
       const Scaffold(
@@ -65,7 +80,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
     );
   }
 
-  Widget data(BuildContext context, Tables selectedTable, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
+  Widget data(BuildContext context, Tables? selectedTable, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -74,14 +89,19 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Modifier la table'),
+        title:  Text( widget.isAdd ? 'Ajouter une table' :'Modifier la table'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             tooltip: 'Enregistrer',
             onPressed: _isValid ?
                 () async {
-              await notifier.saveTable(_temporarySelectedTableCapacity, _temporarySelectedTableNumber);
+              if (widget.isAdd) {
+                await notifier.addTable(_temporarySelectedTableNumber, _temporarySelectedTableCapacity);
+              } else {
+                await notifier.saveTable(_temporarySelectedTableCapacity, _temporarySelectedTableNumber);
+              }
+
               if(context.mounted) {
                 Navigator.pop(context);
               }
@@ -160,10 +180,8 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
                     }
 
                     for (final table in _allTables) {
-                      if (table.tableNumber == tableNumber && tableNumber != selectedTable.tableNumber) {
-                        print(tableNumber);
-                        print(selectedTable.id);
-
+                      final isSameTable = !widget.isAdd && table.id == selectedTable!.id;
+                      if (table.tableNumber == tableNumber && !isSameTable) {
                         return 'Ce numéro de table est déjà utilisé pour ce restaurant.';
                       }
                     }
@@ -239,6 +257,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   }
 
   bool canUpdateCapacity() {
+    if (widget.isAdd) return true;
 
     final reservationsUsingTable = ref
         .read(managerStateProvider)
@@ -274,6 +293,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   }
 
   int getMinAllowedCapacity() {
+    if (widget.isAdd) return 1;
     final reservationsUsingTable = ref
         .read(managerStateProvider)
         .value!

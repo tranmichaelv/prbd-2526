@@ -146,6 +146,24 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState> {
     }
   }
 
+  Future<void> addTable(int tableNumber, int capacity) async {
+    final current = state.value!;
+    final restaurant = current.selectedRestaurant!;
+
+    state = const AsyncLoading();
+
+    try {
+      await Tables.addTable(restaurantId: restaurant.id, numberOfTable: tableNumber, capacity: capacity);
+
+      final tables = await Tables.getAllTablesFromRestaurant(restaurant.id);
+
+      state = AsyncData(current.copyWith(restaurantTables: tables));
+    } catch (e) {
+      state = AsyncValue.error("Something went wrong!\nPlease try again later.", StackTrace.current);
+    }
+
+  }
+
   Future<void> selectTable(Tables table) async {
     final current = state.value!;
     state = const AsyncLoading();
