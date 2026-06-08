@@ -268,6 +268,7 @@ class RestaurantManagementReservationsPageScreen extends ConsumerWidget {
             }
 
             if (index == 2) {
+              notifier.getTablesForRestaurant(reservations.selectedRestaurant!);
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

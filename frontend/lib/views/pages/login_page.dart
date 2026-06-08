@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/providers/auth_provider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
 import 'package:prbd_2526_c03/services/api_client.dart';
 import 'package:prbd_2526_c03/services/params.dart';
 import 'package:prbd_2526_c03/views/pages/signup_page.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -37,9 +40,17 @@ class _LoginState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+
+    ref.read(simulatedTimeProvider.notifier).getSimulatedTime();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +60,9 @@ class _LoginState extends ConsumerState<LoginPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: () {
+              ref.read(simulatedTimeProvider.notifier).getSimulatedTime();
+            },
           ),
         ],
         elevation: 2,
@@ -61,16 +74,21 @@ class _LoginState extends ConsumerState<LoginPage> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

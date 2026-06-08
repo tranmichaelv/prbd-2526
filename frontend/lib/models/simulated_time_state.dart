@@ -19,14 +19,17 @@ class SimulatedTimeState {
     String? error,
   }) {
     return SimulatedTimeState(
-      dateTime: dateTime ?? this.dateTime,
+      dateTime: dateTime,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
   }
 
   static Future<DateTime> getSimulatedTime() async {
-    final response = await ApiClient.get('get_simulated_time');
+    final response = await ApiClient.get(
+      'get_simulated_time',
+      anonymous: true,
+    );
 
     if (response.statusCode == 200) {
       return DateTime.parse(jsonDecode(response.body));
@@ -39,12 +42,28 @@ class SimulatedTimeState {
   static Future<void> saveSimulatedTime(DateTime newDateTime) async {
     final response = await ApiClient.post(
         'save_simulated_time',
+        anonymous: true,
         body: json.encode({
           '_datetime': newDateTime.toString(),
         })
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+    throw Exception(
+      'Failed to load reservations: ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> nullSimulatedTime() async {
+    final response = await ApiClient.post(
+        'null_simulated_time',
+        anonymous: true,
+        body: jsonEncode({})
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
       return;
     }
     throw Exception(

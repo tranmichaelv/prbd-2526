@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/core/tools/validating_text_editing_controller.dart';
 import 'package:prbd_2526_c03/models/user.dart';
 import 'package:prbd_2526_c03/services/security.dart';
+import 'package:prbd_2526_c03/views/pages/home_client_page.dart';
 import 'package:prbd_2526_c03/views/pages/login_page.dart';
 
 void main() async {
@@ -286,7 +287,7 @@ class SignupState extends State<SignupPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const LoginPage(),
+          builder: (context) => const HomeClientPageScreen(),
         ),
       );
     } catch (e) {

@@ -16,7 +16,8 @@ begin
     return query
     select t.*
     from tables t
-    where t.restaurant = _restaurant_id;
+    where t.restaurant = _restaurant_id
+    order by t.table_number;
 end;
 $$ language plpgsql  security definer ;
 

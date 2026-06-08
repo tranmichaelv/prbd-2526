@@ -6,10 +6,10 @@ create or replace function get_simulated_time()
     returns timestamp as
 
 $$
-select * from current_time_for_rules();
+select * from system_time limit 1;
 $$ language sql security definer ;
 
-grant execute on function  get_simulated_time() to authenticated;
+grant execute on function  get_simulated_time() to authenticated, anon;
 
 
 
@@ -26,15 +26,19 @@ return _dateTime;
 end;
 $$ language plpgsql security definer ;
 
-grant execute on function  save_simulated_time(_dateTime timestamp) to authenticated;
+grant execute on function  save_simulated_time( timestamp) to authenticated, anon;
+
+drop function if exists null_simulated_time();
+create or replace function null_simulated_time()
+    returns void  as
+$$
+begin
+    update system_time
+    set simulated_time = null
+    where simulated_time = get_simulated_time();
+end;
+$$ language plpgsql security definer ;
+
+grant execute on function  null_simulated_time() to authenticated, anon;
 
 
-
-set search_path to "prbd-2526-c03", public;
-
-ALTER SYSTEM SET logging_collector = 'on';
-ALTER SYSTEM SET log_statement = 'all';
-
-SELECT pg_reload_conf();
-
-SELECT pg_current_logfile();

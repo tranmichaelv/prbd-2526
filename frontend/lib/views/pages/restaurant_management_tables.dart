@@ -160,7 +160,17 @@ class RestaurantManagementTablesPageScreen extends ConsumerWidget {
               right: 16,
               child: FloatingActionButton(
                 heroTag: 'tables_fab',
-                onPressed: () {},
+                onPressed: () async {
+                  final saved = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditTablePageScreen(isAdd: true,)
+                      ),
+                    );
+                  if (saved == true) {
+                    await notifier.getTablesForRestaurant(restaurant);
+                  }
+                },
                 child: const Icon(Icons.add),
               ),
             ),

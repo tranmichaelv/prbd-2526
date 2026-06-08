@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/models/reservation.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 import 'package:prbd_2526_c03/views/pages/add_reservation_page.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 class ReservationDetailsPageScreen extends ConsumerStatefulWidget {
   final Reservation reservation;
@@ -130,11 +132,11 @@ class _ReservationDetailsPageScreenState
   Widget build(BuildContext context) {
     final reservation = widget.reservation;
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final referenceTime =  ref.watch(referenceTimeProvider);
     final dateTime = reservation.datetime;
 
     final canShowActions = _status == 'pending' || _status == 'confirmed';
-    final canEdit = _status == 'pending' && dateTime.isAfter(simulatedTime);
+    final canEdit = _status == 'pending' && dateTime.isAfter(referenceTime);
 
     return Scaffold(
       appBar: AppBar(
@@ -164,16 +166,21 @@ class _ReservationDetailsPageScreenState
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

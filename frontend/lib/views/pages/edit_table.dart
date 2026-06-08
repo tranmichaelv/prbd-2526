@@ -7,6 +7,7 @@ import 'package:prbd_2526_c03/models/tables.dart';
 import 'package:prbd_2526_c03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/views/pages/my_restaurants.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -23,7 +24,11 @@ void main() async {
 }
 
 class EditTablePageScreen extends ConsumerStatefulWidget {
-  const EditTablePageScreen({super.key});
+  final bool isAdd;
+  const EditTablePageScreen({
+    super.key,
+    this.isAdd = false,
+  });
 
   @override
   ConsumerState<EditTablePageScreen> createState() => _EditTablePageScreen();
@@ -38,11 +43,22 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   @override
   void initState() {
     super.initState();
-    final selectedTable = ref.read(managerStateProvider).value!.selectedTable!;
 
-    _temporarySelectedTableNumber = selectedTable.tableNumber;
-    _temporarySelectedTableCapacity = selectedTable.capacity;
-    _allTables = ref.read(managerStateProvider).value!.restaurantTables;
+    final managerState = ref.read(managerStateProvider).value!;
+    _allTables = managerState.restaurantTables;
+
+    if(widget.isAdd) {
+      _temporarySelectedTableNumber = _allTables.isEmpty ? 1 : _allTables.map((t) => t.tableNumber).reduce((a, b) => a > b ? a : b) + 1;
+
+      _temporarySelectedTableCapacity = 1;
+    } else {
+      final selectedTable = ref.read(managerStateProvider).value!.selectedTable!;
+
+      _temporarySelectedTableNumber = selectedTable.tableNumber;
+      _temporarySelectedTableCapacity = selectedTable.capacity;
+    }
+
+   // _allTables = ref.read(managerStateProvider).value!.restaurantTables;
   }
 
   @override
@@ -55,7 +71,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
 
     return asyncState.when(
       data: (state) =>
-          data(context, state.selectedTable!, notifier, theme, referenceTime, ref),
+          data(context, widget.isAdd ? null : state.selectedTable!, notifier, theme, referenceTime, ref),
       error: (err, _) => error(err, StackTrace.current, notifier),
       loading: () =>
       const Scaffold(
@@ -64,7 +80,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
     );
   }
 
-  Widget data(BuildContext context, Tables table, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
+  Widget data(BuildContext context, Tables? selectedTable, ManagerStateNotifier notifier, dynamic theme, DateTime referenceTime, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -73,14 +89,22 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Modifier la table'),
+        title:  Text( widget.isAdd ? 'Ajouter une table' :'Modifier la table'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             tooltip: 'Enregistrer',
             onPressed: _isValid ?
-                () {
+                () async {
+              if (widget.isAdd) {
+                await notifier.addTable(_temporarySelectedTableNumber, _temporarySelectedTableCapacity);
+              } else {
+                await notifier.saveTable(_temporarySelectedTableCapacity, _temporarySelectedTableNumber);
+              }
 
+              if(context.mounted) {
+                Navigator.pop(context);
+              }
             } : null,
             icon: const Icon(Icons.save),
           ),
@@ -101,16 +125,21 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(referenceTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
@@ -128,7 +157,10 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (val) => setState(() {
+                    _temporarySelectedTableNumber =
+                        int.tryParse(val) ?? _temporarySelectedTableNumber;
+                  }),
                   initialValue: '$_temporarySelectedTableNumber',
                   decoration: const InputDecoration(
                     labelText: 'Numéro de table',
@@ -148,7 +180,8 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
                     }
 
                     for (final table in _allTables) {
-                      if (table.tableNumber == tableNumber && tableNumber != _temporarySelectedTableNumber) {
+                      final isSameTable = !widget.isAdd && table.id == selectedTable!.id;
+                      if (table.tableNumber == tableNumber && !isSameTable) {
                         return 'Ce numéro de table est déjà utilisé pour ce restaurant.';
                       }
                     }
@@ -162,11 +195,13 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove),
-                      onPressed: _temporarySelectedTableCapacity == 1 || _temporarySelectedTableCapacity <= getMinAllowedCapacity() ? null : () {
-                        setState(() {
-                          _temporarySelectedTableCapacity --;
-                        });
-                      },
+                        onPressed: canDecreaseCapacity()
+                            ? () {
+                          setState(() {
+                            _temporarySelectedTableCapacity--;
+                          });
+                        }
+                            : null,
                       tooltip:  _temporarySelectedTableCapacity == 1 ? 'Capacité minimale (1 personne)' :
                       _temporarySelectedTableCapacity <= getMinAllowedCapacity() ?
                         "Impossible de diminuer la capacité : une ou plusieurs réservations utilisent cette table et nécessitent au moins cette capacité"
@@ -224,6 +259,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   }
 
   bool canUpdateCapacity() {
+    if (widget.isAdd) return true;
 
     final reservationsUsingTable = ref
         .read(managerStateProvider)
@@ -259,6 +295,7 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
   }
 
   int getMinAllowedCapacity() {
+    if (widget.isAdd) return 1;
     final reservationsUsingTable = ref
         .read(managerStateProvider)
         .value!
@@ -273,5 +310,21 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
     return reservationsUsingTable
         .map((r) => r.numberOfGuests)
         .reduce((a, b) => a > b ? a : b);
+  }
+
+  bool canDecreaseCapacity() {
+    if (_temporarySelectedTableCapacity <= 1) {
+      return false;
+    }
+
+    final oldCapacity = _temporarySelectedTableCapacity;
+
+    _temporarySelectedTableCapacity--;
+
+    final valid = canUpdateCapacity();
+
+    _temporarySelectedTableCapacity = oldCapacity;
+
+    return valid;
   }
 }

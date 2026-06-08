@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_c03/providers/auth_provider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
 import 'package:prbd_2526_c03/views/pages/search_restaurants_page.dart';
-import '../../services/api_client.dart';
-import 'package:prbd_2526_c03/providers/auth_provider.dart';
+import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
 
 
 class HomeClientPageScreen extends ConsumerStatefulWidget{
@@ -24,6 +23,7 @@ class _HomeClientPageScreenState extends ConsumerState<HomeClientPageScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final reservations = ref.watch(reservationsProvider);
+    final referenceTime =  ref.watch(referenceTimeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -73,14 +73,21 @@ class _HomeClientPageScreenState extends ConsumerState<HomeClientPageScreen> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  'mercredi 04/12/2024 16:00',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+              child: GestureDetector(
+                onTap: () {
+                  SimuledTime().show(context);
+                },
+                child: Tooltip(
+                  message:
+                  'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                  child: Text(
+                    DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

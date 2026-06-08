@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_c03/models/available_slot.dart';
 
 import 'package:prbd_2526_c03/models/reservation.dart';
 import 'package:prbd_2526_c03/models/restaurant_search_result.dart';
 import 'package:prbd_2526_c03/providers/available_slots_provider.dart';
 import 'package:prbd_2526_c03/providers/reservations_provider.dart';
+import 'package:prbd_2526_c03/providers/simulated_time_provider.dart';
+import 'package:prbd_2526_c03/providers/reference_time_provider.dart';
 
 class ReservationAddPage extends ConsumerStatefulWidget {
   final RestaurantSearchResult? restaurant;
@@ -22,16 +25,18 @@ class ReservationAddPage extends ConsumerStatefulWidget {
 }
 
 class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
-  DateTime selectedDate = DateTime(2024, 12, 4);
+
+  final _fromKey = GlobalKey<FormState>();
+
+  DateTime selectedDate = DateTime.now();
   DateTime? selectedSlot;
 
   int numberOfGuests = 2;
 
-  final TextEditingController specialRequestsController =
-  TextEditingController();
+  final TextEditingController specialRequestsController = TextEditingController();
 
-  final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
+  // getters
   bool get isEdit => widget.reservation != null;
 
   int get restaurantId {
@@ -51,10 +56,12 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
   }
 
   DateTime get firstSelectableDate {
+    final referenceTime = ref.read(referenceTimeProvider);
+    // print('LE TEMPS DE l APPLI ${referenceTime}');
     return DateTime(
-      simulatedTime.year,
-      simulatedTime.month,
-      simulatedTime.day,
+      referenceTime.year,
+      referenceTime.month,
+      referenceTime.day,
     );
   }
 
@@ -68,6 +75,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
     return text;
   }
 
+  // initialisation
   @override
   void initState() {
     super.initState();
@@ -78,20 +86,126 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
       numberOfGuests = widget.reservation!.numberOfGuests;
       specialRequestsController.text =
           widget.reservation!.specialRequests ?? '';
+    } else {
+      selectedDate = firstSelectableDate;
     }
 
     Future.microtask(() {
-      _loadSlots();
+      if (isEdit) {
+        _loadSlots();
+      } else {
+        _firstAvailableSlot();
+      }
     });
   }
 
+  // util functions
   void _loadSlots() {
+
     ref.read(availableSlotsProvider.notifier).loadSlots(
       restaurantId: restaurantId,
       date: selectedDate,
     );
   }
 
+  Future<void> _firstAvailableSlot() async {
+
+    // je récup la date simulé actuellement
+    DateTime currentTime = ref.read(referenceTimeProvider);
+
+    DateTime dateToCheck = DateTime(
+        currentTime.year,
+        currentTime.month,
+        currentTime.day
+    );
+
+    // tester les 60 jours a venir seulement pour éviter que ca tourne a l'infini
+    for (int i = 0; i < 60; i++) {
+      // je récup les créneau dispo d'un restaurant
+      final slots = await AvailableSlot.getAvailableSlots(
+          restaurantId: restaurantId,
+          date: dateToCheck
+      );
+
+      final slotsDates = slots
+          .map((slots) => slots.slotDateTime)
+          .where((slotDate) {
+        if (_sameDay(slotDate, currentTime)){
+          return slotDate.isAfter(currentTime);
+        }
+
+        return true;
+      }).toList();
+      //print(slotsDates);
+      slotsDates.sort();
+
+      if (slotsDates.isNotEmpty) {
+        setState(() {
+          selectedDate = dateToCheck;
+          selectedSlot = slotsDates.first;
+        });
+
+        await ref.read(availableSlotsProvider.notifier).loadSlots(
+            restaurantId: restaurantId,
+            date: selectedDate
+        );
+        return;
+      }
+
+      dateToCheck = dateToCheck.add(const Duration(days: 1));
+
+    }
+
+    setState(() {
+      selectedDate = firstSelectableDate;
+      selectedSlot = null;
+    });
+
+    _loadSlots();
+  }
+
+  Future<void> _changeReferenceTime() async {
+
+    // récup la date grace au provider
+    final currentReferenceTime = ref.read(referenceTimeProvider);
+
+
+    final pickedDate = await showDatePicker(
+        context: context,
+        initialDate: currentReferenceTime,
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2030),
+        locale: const Locale('fr', 'FR')
+    );
+
+    if (pickedDate == null) return;
+
+    if (!context.mounted) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(currentReferenceTime),
+    );
+
+    if (pickedTime == null) return;
+
+
+    final newReferenceTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute
+    );
+
+    await ref.read(simulatedTimeProvider.notifier).saveSimulatedTime(newReferenceTime);
+
+    if (isEdit) {
+      _loadSlots();
+    } else {
+      await _firstAvailableSlot();
+    }
+  }
   void _changeDate(int days) {
     final newDate = selectedDate.add(Duration(days: days));
 
@@ -121,6 +235,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
   Widget build(BuildContext context) {
     final slotsAsync = ref.watch(availableSlotsProvider);
     final theme = Theme.of(context);
+    final DateTime referenceTime = ref.watch(referenceTimeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -153,13 +268,16 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
               child: Tooltip(
                 message:
                 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+                child: InkWell(
+                  onTap: _changeReferenceTime,
+                  child: Text(
+                    DateFormat('EEE dd/MM/yyyy HH:mm', 'fr_FR')
+                        .format(referenceTime),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
@@ -171,6 +289,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
+            key: _fromKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -200,7 +319,7 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                                   ? firstSelectableDate
                                   : selectedDate,
                               firstDate: firstSelectableDate,
-                              lastDate: simulatedTime.add(
+                              lastDate: referenceTime.add(
                                 const Duration(days: 60),
                               ),
                               locale: const Locale('fr', 'FR'),
@@ -248,7 +367,12 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.remove),
-                      onPressed: () {
+                      // pour empecher de revenir derrière quand
+                      // le premier créneaux dispo n'est plus a cette date la
+                      onPressed: selectedDate.isAtSameMomentAs(firstSelectableDate)
+                          || selectedDate.isBefore(firstSelectableDate)
+                          ? null
+                          : () {
                         _changeDate(-1);
                       },
                     ),
@@ -319,12 +443,17 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                   data: (slots) {
                     final slotDates = slots
                         .map((slot) => slot.slotDateTime)
-                        .toList();
+                        .where((slotDate) {
+                      if (_sameDay(slotDate, referenceTime)) {
+                        return slotDate.isAfter(referenceTime);
+                      }
+                      return true;
+                    }).toList();
 
-                    if (isEdit &&
-                        selectedSlot != null &&
-                        _sameDay(selectedSlot!, selectedDate) &&
-                        !slotDates.any(
+                    if (isEdit
+                        && selectedSlot != null
+                        && _sameDay(selectedSlot!, selectedDate)
+                        && !slotDates.any(
                               (date) => date.isAtSameMomentAs(selectedSlot!),
                         )) {
                       slotDates.add(selectedSlot!);
@@ -429,12 +558,28 @@ class _ReservationAddPageState extends ConsumerState<ReservationAddPage> {
                     hintText: 'Allergies, préférences...',
                   ),
                   maxLines: 3,
+                  validator: (value) {
+                    final text = value?.trim() ?? '';
+
+                    if (text.isEmpty) {
+                      return null;
+                    }
+
+                    if (text.length < 10) {
+                      return 'Les demandes spécials doivent contenir au moins 10 caractères';
+                    }
+                    return null;
+                  },
                 ),
 
                 const SizedBox(height: 32),
 
                 ElevatedButton.icon(
                   onPressed: () async {
+
+                    if (!_fromKey.currentState!.validate()) {
+                      return;
+                    }
                     if (selectedSlot == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

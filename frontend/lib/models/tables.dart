@@ -52,15 +52,33 @@ class Tables {
         '_table_id': tableId,
       }),
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> body = jsonDecode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 204) {
       return;
     }
 
     throw Exception(
       'Failed to load reservations: ${response.statusCode} ${response.body}',
     );
+  }
+
+  static Future<void> addTable({
+  required int restaurantId,
+  required int numberOfTable,
+  required int capacity
+}) async {
+    final response = await ApiClient.post(
+      'add_table',
+      body: jsonEncode({
+        '_restaurant_id' : restaurantId,
+        '_number_table' : numberOfTable,
+        '_capacity' : capacity,
+      })
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to add table : ${response.statusCode} ${response.body}',);
+    }
   }
 
   // static Future<List<Tables>> getTablesAvailable(int reservationId) async {
