@@ -26,7 +26,7 @@ return _dateTime;
 end;
 $$ language plpgsql security definer ;
 
-grant execute on function  save_simulated_time(_dateTime timestamp) to authenticated, anon;
+grant execute on function  save_simulated_time( timestamp) to authenticated, anon;
 
 drop function if exists null_simulated_time();
 create or replace function null_simulated_time()

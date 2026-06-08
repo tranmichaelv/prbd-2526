@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -8,8 +7,6 @@ import 'package:prbd_2526_c03/providers/reservations_provider.dart';
 import 'package:prbd_2526_c03/views/pages/reservation_details_page.dart';
 import 'package:prbd_2526_c03/views/pages/search_restaurants_page.dart';
 import 'package:prbd_2526_c03/views/widgets/simuled_time.dart';
-import '../../services/api_client.dart';
-import 'package:prbd_2526_c03/providers/auth_provider.dart';
 
 
 class HomeClientPageScreen extends ConsumerStatefulWidget{
