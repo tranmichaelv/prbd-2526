@@ -195,11 +195,13 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove),
-                      onPressed: _temporarySelectedTableCapacity == 1 || _temporarySelectedTableCapacity <= getMinAllowedCapacity() ? null : () {
-                        setState(() {
-                          _temporarySelectedTableCapacity --;
-                        });
-                      },
+                        onPressed: canDecreaseCapacity()
+                            ? () {
+                          setState(() {
+                            _temporarySelectedTableCapacity--;
+                          });
+                        }
+                            : null,
                       tooltip:  _temporarySelectedTableCapacity == 1 ? 'Capacité minimale (1 personne)' :
                       _temporarySelectedTableCapacity <= getMinAllowedCapacity() ?
                         "Impossible de diminuer la capacité : une ou plusieurs réservations utilisent cette table et nécessitent au moins cette capacité"
@@ -308,5 +310,21 @@ class _EditTablePageScreen extends ConsumerState<EditTablePageScreen> {
     return reservationsUsingTable
         .map((r) => r.numberOfGuests)
         .reduce((a, b) => a > b ? a : b);
+  }
+
+  bool canDecreaseCapacity() {
+    if (_temporarySelectedTableCapacity <= 1) {
+      return false;
+    }
+
+    final oldCapacity = _temporarySelectedTableCapacity;
+
+    _temporarySelectedTableCapacity--;
+
+    final valid = canUpdateCapacity();
+
+    _temporarySelectedTableCapacity = oldCapacity;
+
+    return valid;
   }
 }
