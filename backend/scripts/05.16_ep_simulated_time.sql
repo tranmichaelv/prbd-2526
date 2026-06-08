@@ -41,3 +41,5 @@ $$ language plpgsql security definer ;
 
 grant execute on function  null_simulated_time() to authenticated, anon;
 
+select * from users;
+select * from reservations where client = 9
