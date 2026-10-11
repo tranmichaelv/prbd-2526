@@ -1,6 +1,5 @@
 # ReserVite — Application de gestion de réservations de restaurants
-
-# Projet PRBD 2526 - Groupe c03
+### Projet PRBD 2526 - Groupe c03
   
 Projet de groupe réalisé à l'EPFC dans le cadre du cours « Projet de développement – Système de Gestion de Base de Données » (2025–2026).
 
@@ -25,7 +24,7 @@ Respect des règles métier, des disponibilités et des autorisations.
 Gestion du temps simulé 
 
 # Notes de version
-# V1.0
+### V1.0
 Première version de l'application comprenant les fonctionnalités principales de réservation et de gestion des restaurants.
 
 ### Liste des bugs connus
